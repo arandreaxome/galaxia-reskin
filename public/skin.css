@@ -1078,3 +1078,173 @@ html.radar-skin .radar-echo.echo-unknown {
     transform: translate(-50%, -50%) rotate(var(--echo-rotate)) scale(var(--echo-scale));
   }
 }
+
+/* --------------------------------------------------------------------------
+   Messages en télégrammes : feuille ivoire, machine à écrire, tampon.
+   Le jeu colore par variables : on les redéfinit sur la feuille (encre noire),
+   puis on rend au rejeu du combat celles de l'écran sombre.
+   -------------------------------------------------------------------------- */
+
+html.radar-skin .msg-view.panel:has(> .msg-head) {
+  --text: var(--c-black);
+  --text-2: var(--c-anthracite);
+  --muted: rgb(26 26 26 / 68%);
+  --line: rgb(26 26 26 / 22%);
+  --line-2: rgb(26 26 26 / 45%);
+  --surface: transparent;
+  --surface-2: rgb(26 26 26 / 6%);
+  --accent: var(--c-black);
+  --accent-2: var(--c-black);
+  --good: var(--c-field);
+  --warn: var(--c-anthracite);
+  --own: var(--c-black);
+  --hostile: var(--c-red);
+  --metal: var(--c-black);
+  --crystal: var(--c-black);
+  --deuterium: var(--c-black);
+  --energy: var(--c-black);
+  color: var(--c-black);
+  font-family: var(--skin-typewriter);
+  letter-spacing: 0;
+  background: var(--c-ivory);
+  border-color: var(--c-ivory);
+}
+
+html.radar-skin .msg-view.panel .combat-replay {
+  --text: var(--c-ivory);
+  --text-2: var(--c-ivory-2);
+  --muted: var(--c-ivory-3);
+  --line: var(--c-olive);
+  --line-2: var(--c-field);
+  --surface: var(--c-anthracite);
+  --surface-2: var(--c-black);
+  --accent: var(--c-ivory);
+  --accent-2: var(--c-ivory);
+  --good: var(--c-ivory);
+  --warn: var(--c-ivory);
+  --own: var(--c-ivory);
+  --hostile: var(--c-brick);
+  color: var(--c-ivory);
+  font-family: var(--skin-font);
+  letter-spacing: 0.01em;
+}
+
+/* En-tête : le bandeau du formulaire occupe la première ligne, le tampon s'y pose à droite. */
+html.radar-skin .msg-view.panel > .msg-head {
+  position: relative;
+  flex-wrap: wrap;
+}
+
+html.radar-skin .msg-view.panel > .msg-head > div {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Bandeau : nature de la dépêche, d'après le rapport qui suit l'en-tête. */
+html.radar-skin .msg-view.panel > .msg-head::before {
+  content: 'T\C9 L\C9 GRAMME';
+  flex: 0 0 100%;
+  margin-bottom: 6px;
+  padding-bottom: 8px;
+  font: 400 15px / 1.2 var(--skin-telex);
+  letter-spacing: 0.3em;
+  border-bottom: 3px double var(--c-black);
+}
+
+html.radar-skin .msg-view.panel > .msg-head:has(+ .report.spy)::before {
+  content: 'RAPPORT DE RECONNAISSANCE';
+}
+
+html.radar-skin .msg-view.panel > .msg-head:has(+ .report.combat)::before {
+  content: 'RAPPORT D\2019 ENGAGEMENT';
+}
+
+html.radar-skin .msg-view.panel > .msg-head:has(+ .report.expedition)::before {
+  content: 'RAPPORT D\2019 EXP\C9 DITION';
+}
+
+html.radar-skin .msg-view.panel > .msg-head:has(+ .report.missile)::before {
+  content: 'RAPPORT DE FRAPPE';
+}
+
+/* Tampon : SECRET sur l'espionnage, issue de la bataille sur l'engagement. Encre mate et grain de caoutchouc. */
+html.radar-skin .msg-view.panel > .msg-head:has(+ :is(.report.spy, .report.combat))::after {
+  --stamp: var(--c-red);
+  content: 'SECRET';
+  position: absolute;
+  top: -10px;
+  right: 6px;
+  padding: 3px 10px 1px;
+  color: var(--stamp);
+  font: 800 22px / 1 var(--skin-stencil);
+  letter-spacing: 0.14em;
+  border: 4px double var(--stamp);
+  border-radius: 3px;
+  transform: rotate(-5deg);
+  opacity: 0.88;
+  pointer-events: none;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='70'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 -2.4 2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 140px 70px;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='70'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 -2.4 2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 140px 70px;
+}
+
+html.radar-skin .msg-view.panel > .msg-head:has(+ .report.combat)::after {
+  --stamp: var(--c-anthracite);
+  content: 'MATCH NUL';
+}
+
+html.radar-skin .msg-view.panel > .msg-head:has(+ .report.combat > p:first-child > b.good)::after {
+  --stamp: var(--c-field);
+  content: 'VICTOIRE';
+}
+
+html.radar-skin .msg-view.panel > .msg-head:has(+ .report.combat > p:first-child > b.bad)::after {
+  --stamp: var(--c-red);
+  content: 'D\C9 FAITE';
+}
+
+/* Titre tapé à la machine, intertitres et en-têtes de tableau en capitales d'imprimerie. */
+html.radar-skin .msg-view.panel > .msg-head h2 {
+  font-family: var(--skin-telex);
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+html.radar-skin .msg-view.panel :is(h4, .table th) {
+  font-family: var(--skin-typewriter);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Survol d'une ligne : teinte d'encre légère (l'olive du thème sombre noierait l'encre). */
+html.radar-skin .msg-view.panel .table tbody tr:hover td:not(.bad, .good) {
+  background: rgb(26 26 26 / 6%) !important;
+}
+
+/* Lignes que le jeu code en rose sur fond sombre : encre rouge sur la feuille. */
+html.radar-skin .msg-view.panel :is(.exp-pirates h4, .exp-aliens h4, .exp-lost h4, .report.raid.invasion p:first-child) {
+  color: var(--c-red) !important;
+}
+
+/* Tableaux plus serrés : la machine à écrire est large, les colonnes de pertes doivent tenir. */
+html.radar-skin .msg-view.panel .table {
+  font-size: 13px;
+}
+
+/* « (+1 réparées) » passe à la ligne d'un bloc plutôt que coupé en deux. */
+html.radar-skin .msg-view.panel .table td > small {
+  white-space: nowrap;
+}
+
+/* Texte libre (messages du jeu, des flottes, sociaux) : bandes de télégraphe collées sur la feuille. */
+html.radar-skin .msg-view.panel > p.pre:not(:empty) {
+  display: inline;
+  padding: 3px 8px;
+  line-height: 2.3;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgb(26 26 26 / 7%);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
