@@ -127,6 +127,17 @@ html.radar-skin :is(h1, h2, h3, h4, .brand-txt b, .sim-verdict b, .login-logo h1
   text-transform: uppercase;
 }
 
+/* Titres de page et nom du jeu au pochoir, comme sur les caisses. */
+html.radar-skin :is(h1, .page-head h2, .brand-txt b) {
+  font-family: var(--skin-stencil);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+html.radar-skin .brand-txt b {
+  font-size: 19px;
+}
+
 /* Décors : étoiles, nébuleuse, halos (le halo de la carte devient l'écran du sonar, plus bas). */
 html.radar-skin :is(.stars, .nebula, .pv-halo, .threat-halo) {
   display: none !important;
