@@ -30,8 +30,25 @@ function sync() {
 const LAYERS = { skin: 'radar-skin', assets: 'radar-assets' } as const;
 type Layer = keyof typeof LAYERS;
 
-function applyLayer(layer: Layer, on: boolean) {
+// Polices d'époque de l'habillage (pochoir, machine à écrire), chez Google Fonts comme celles du jeu.
+// Chrome ne suit pas les @import des styles d'extension : la feuille passe par un lien dans la page.
+const FONTS_ID = 'galaxia-radar-fonts';
+const FONTS_URL =
+  'https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil:wght@800&family=Courier+Prime:wght@400;700&family=Special+Elite&display=swap';
+
+function loadFonts() {
+  if (document.getElementById(FONTS_ID)) return;
+  const link = Object.assign(document.createElement('link'), { id: FONTS_ID, rel: 'stylesheet', href: FONTS_URL });
+  (document.head ?? document.documentElement).append(link);
+}
+
+function showLayer(layer: Layer, on: boolean) {
   document.documentElement.classList.toggle(LAYERS[layer], on);
+  if (layer === 'skin' && on) loadFonts();
+}
+
+function applyLayer(layer: Layer, on: boolean) {
+  showLayer(layer, on);
   try {
     localStorage.setItem(`galaxia-radar.${layer}`, on ? '1' : '0');
   } catch {
@@ -48,7 +65,7 @@ function applySettings(settings: unknown) {
 
 try {
   for (const layer of Object.keys(LAYERS) as Layer[]) {
-    document.documentElement.classList.toggle(LAYERS[layer], localStorage.getItem(`galaxia-radar.${layer}`) === '1');
+    showLayer(layer, localStorage.getItem(`galaxia-radar.${layer}`) === '1');
   }
   void chrome.storage.local.get('settings').then(({ settings }) => applySettings(settings));
   chrome.storage.onChanged.addListener((changes, area) => {

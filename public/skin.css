@@ -22,6 +22,10 @@ html.radar-skin {
   --c-ivory-2: rgb(232 228 217 / 72%);
   --c-ivory-3: rgb(232 228 217 / 58%);
   --skin-font: 'Avenir Next Condensed', 'Bahnschrift SemiCondensed', Bahnschrift, 'Roboto Condensed', 'Arial Narrow', system-ui, sans-serif;
+  /* Polices d'époque chargées par content.js (lien vers Google Fonts) */
+  --skin-stencil: 'Big Shoulders Stencil', var(--skin-font);
+  --skin-typewriter: 'Courier Prime', 'Courier New', monospace;
+  --skin-telex: 'Special Elite', var(--skin-typewriter);
 
   /* Variables du jeu, ramenées à la palette */
   --bg: var(--c-black);
