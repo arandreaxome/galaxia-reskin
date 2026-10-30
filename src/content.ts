@@ -25,9 +25,10 @@ function sync() {
   send({ type: 'token', token });
 }
 
-// Habillage du site et pack d'assets (réglages de l'extension, styles dans skin.css et skin-assets.css).
-// Chaque classe est posée tout de suite d'après la dernière valeur, gardée dans le stockage du site, puis confirmée.
-const LAYERS = { skin: 'radar-skin', assets: 'radar-assets' } as const;
+// Habillage du site, pack d'assets et renommage (réglages de l'extension ; styles dans skin.css et
+// skin-assets.css, renommage dans rename.js). Chaque classe est posée tout de suite d'après la dernière
+// valeur, gardée dans le stockage du site, puis confirmée.
+const LAYERS = { skin: 'radar-skin', assets: 'radar-assets', rename: 'radar-rename' } as const;
 type Layer = keyof typeof LAYERS;
 
 // Polices d'époque de l'habillage (pochoir, machine à écrire), chez Google Fonts comme celles du jeu.
@@ -58,9 +59,10 @@ function applyLayer(layer: Layer, on: boolean) {
 
 /** Le pack d'assets suit l'habillage tant que son réglage n'a pas été touché. */
 function applySettings(settings: unknown) {
-  const { skin, assets } = (settings ?? {}) as { skin?: boolean; assets?: boolean };
+  const { skin, assets, rename } = (settings ?? {}) as { skin?: boolean; assets?: boolean; rename?: boolean };
   applyLayer('skin', Boolean(skin));
   applyLayer('assets', assets ?? Boolean(skin));
+  applyLayer('rename', Boolean(rename));
 }
 
 try {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { alerts, fleetNextTime, foreignLabel, fullAt, resourcesAt, RESOURCES, shipyardEnd, socialCount } from '../analysis';
 import { clock, coords, duration, num, place } from '../format';
-import { FLEET_STATES, label, MISSIONS, RESOURCE_NAMES } from '../names';
+import { FLEET_STATES, label, missionName, resourceName, setThemedNames } from '../names';
 import { openGame } from '../open-game';
 import { targetStatus, type TargetStore } from '../targets';
 import type { Fleet, GameState, Planet, Settings, Snapshot, Status } from '../types';
@@ -60,6 +60,7 @@ const STATUS_TEXT: Record<Status, (fetchedAt: number) => string> = {
 
 export function App() {
   const { snapshot, status = 'ok', targets, reportsAt, settings } = useStored();
+  setThemedNames(Boolean(settings?.rename));
   const now = useServerNow(snapshot?.offset ?? 0);
   const [tab, setTab] = useState(loadTab);
 
@@ -169,7 +170,7 @@ function PlanetCard({ planet: p, now }: { planet: Planet; now: number }) {
             const full = t != null && t <= now;
             return (
               <tr key={r}>
-                <th>{RESOURCE_NAMES[r]}</th>
+                <th>{resourceName(r)}</th>
                 <td className="num">
                   {num(stock[r])}
                   <span className="muted"> / {num(p.caps[r] ?? 0)}</span>
@@ -262,7 +263,7 @@ function Fleets({ state, now }: { state: GameState; now: number }) {
       {foreign.map(f => (
         <div key={f.id} className={`fleet ${f.hostile ? 'hostile' : ''}`}>
           <div>
-            <span className="tag">{f.mission ? MISSIONS[f.mission] ?? f.mission : 'Inconnue'}</span>
+            <span className="tag">{f.mission ? missionName(f.mission) : 'Inconnue'}</span>
             {foreignLabel(f)} → {place(f.targetName, f.target)}
           </div>
           <div className="when">
@@ -284,7 +285,7 @@ function OwnFleet({ fleet: f, now }: { fleet: Fleet; now: number }) {
   return (
     <div className="fleet">
       <div>
-        <span className="tag">{f.planId ? 'Attaque groupée' : MISSIONS[f.mission ?? ''] ?? f.mission}</span>
+        <span className="tag">{f.planId ? 'Attaque groupée' : missionName(f.mission ?? '')}</span>
         {coords(f.origin)} → {place(f.targetName, f.target)}
       </div>
       <div className="when">

@@ -2,9 +2,10 @@
 // notifie les changements et tient le badge de l'icône à jour. Lecture seule.
 
 import { alerts, diff, initialMemory, messageEvents, nextDeadline, type GameEvent, type Memory } from './analysis';
+import { setThemedNames } from './names';
 import { openGame } from './open-game';
 import { emptyStore, mergeCombats, mergeReports, mergeSystem, reconcile, type TargetStore } from './targets';
-import type { GalaxySystem, GameState, Message, Snapshot, Status } from './types';
+import type { GalaxySystem, GameState, Message, Settings, Snapshot, Status } from './types';
 
 const GAME = 'https://galaxia.eldau.xyz/';
 const API = `${GAME}api`;
@@ -19,6 +20,7 @@ type Stored = {
   memory?: Memory;
   targets?: TargetStore;
   reportsAt?: number;
+  settings?: Settings;
 };
 
 const read = () => chrome.storage.local.get(null) as Promise<Stored>;
@@ -46,6 +48,7 @@ function refresh(force = false): Promise<void> {
 
 async function poll() {
   const stored = await read();
+  setThemedNames(Boolean(stored.settings?.rename));
   if (!stored.token) {
     await chrome.storage.local.set({ status: 'no-token' });
     return updateBadge();

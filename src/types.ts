@@ -146,7 +146,7 @@ export type Target = {
 };
 
 /** Réglages de l'extension (onglet Réglages), lus aussi par content.ts. Sans valeur, `assets` suit `skin`. */
-export type Settings = { skin?: boolean; assets?: boolean };
+export type Settings = { skin?: boolean; assets?: boolean; rename?: boolean };
 
 /** État de la connexion au jeu, gardé dans chrome.storage.local avec le dernier relevé. */
 export type Status = 'ok' | 'no-token' | 'expired' | 'offline';

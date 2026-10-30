@@ -2,7 +2,7 @@
 // Aucun appel à chrome.* ici, pour que la popup et le service worker les partagent.
 
 import { clock, coords, duration, num, place } from './format';
-import { label, MISSIONS, RESOURCE_NAMES } from './names';
+import { label, missionName, resourceName } from './names';
 import type { Fleet, GameState, Message, Planet, Resource, Resources, SocialCounter } from './types';
 
 export const RESOURCES: Resource[] = ['metal', 'crystal', 'deuterium'];
@@ -74,7 +74,7 @@ export const shipsText = (ships: Record<string, number> = {}) =>
 
 const resourcesText = (res: Resources = {}) =>
   RESOURCES.filter(r => (res[r] ?? 0) > 0)
-    .map(r => `${num(res[r] ?? 0)} ${RESOURCE_NAMES[r].toLowerCase()}`)
+    .map(r => `${num(res[r] ?? 0)} ${resourceName(r).toLowerCase()}`)
     .join(' · ');
 
 /** Ce qui attend une action : sert au badge de l'icône et au haut de la popup. */
@@ -95,7 +95,7 @@ export function alerts(s: GameState, now: number): Alert[] {
     for (const r of RESOURCES) {
       const t = fullAt(p, r);
       if (t == null || t - now > STORAGE_WARNING) continue;
-      const text = t <= now ? `${RESOURCE_NAMES[r]} plein sur ${p.name}` : `${RESOURCE_NAMES[r]} plein dans ${duration(t - now)} sur ${p.name}`;
+      const text = t <= now ? `${resourceName(r)} : stockage plein sur ${p.name}` : `${resourceName(r)} : stockage plein dans ${duration(t - now)} sur ${p.name}`;
       list.push({ level: 'warning', text, route: '#/resources' });
     }
   }
@@ -199,7 +199,7 @@ export function diff(prev: GameState | null, next: GameState, memory: Memory): {
         id: `back:${f.id}`,
         level: 'info',
         title: `Flotte revenue sur ${home}`,
-        message: [shipsText(f.ships), cargo && `Cargaison : ${cargo}`].filter(Boolean).join('\n') || MISSIONS[f.mission ?? ''] || 'Flotte',
+        message: [shipsText(f.ships), cargo && `Cargaison : ${cargo}`].filter(Boolean).join('\n') || (f.mission && missionName(f.mission)) || 'Flotte',
         route: '#/fleet',
       });
     }
@@ -237,7 +237,7 @@ export function diff(prev: GameState | null, next: GameState, memory: Memory): {
       events.push({
         id: `storage:${key}`,
         level: 'info',
-        title: level === 'full' ? `${RESOURCE_NAMES[r]} plein sur ${p.name}` : `${RESOURCE_NAMES[r]} bientôt plein sur ${p.name}`,
+        title: level === 'full' ? `${resourceName(r)} : stockage plein sur ${p.name}` : `${resourceName(r)} : stockage bientôt plein sur ${p.name}`,
         message: level === 'full' ? 'La production s’arrête tant que le stockage est plein.' : `Plein à ${clock(t)}, dans ${duration(t - now)}`,
         route: '#/resources',
       });

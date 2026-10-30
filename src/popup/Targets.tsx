@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { RESOURCES, shipsText } from '../analysis';
 import { age, clock, duration, num, short } from '../format';
-import { RESOURCE_NAMES } from '../names';
+import { resourceName } from '../names';
 import { openGame } from '../open-game';
 import { cargoFor, lootOf, nearest, targetStatus, type TargetStatus, type TargetStore } from '../targets';
 import type { GameState, Target } from '../types';
@@ -232,7 +232,7 @@ function Details({ t, probes }: { t: Target; probes: number }) {
       {r ? (
         <dl>
           <dt>Stock</dt>
-          <dd>{RESOURCES.map(res => `${num(r.resources[res] ?? 0)} ${RESOURCE_NAMES[res].toLowerCase()}`).join(' · ')}</dd>
+          <dd>{RESOURCES.map(res => `${num(r.resources[res] ?? 0)} ${resourceName(res).toLowerCase()}`).join(' · ')}</dd>
           <dt>Flotte</dt>
           <dd>{r.ships ? shipsText(r.ships) || 'aucune' : 'inconnue (rapport partiel)'}</dd>
           <dt>Défense</dt>

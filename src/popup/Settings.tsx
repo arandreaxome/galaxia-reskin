@@ -19,6 +19,13 @@ export function SettingsView({ settings = {} }: { settings?: Settings }) {
           <span className="muted">Unités, défenses, bâtiments, recherches, ressources et icônes du menu. Les planètes gardent leurs images.</span>
         </span>
       </label>
+      <label className="setting">
+        <input type="checkbox" checked={Boolean(settings.rename)} onChange={e => update({ rename: e.target.checked })} />
+        <span>
+          <b>Renommer les éléments du jeu</b>
+          <span className="muted">Unités, bâtiments, recherches, ressources et menu prennent les noms du thème (Petit transporteur → Camion). Le nom d’origine reste au survol ; la popup et les notifications suivent.</span>
+        </span>
+      </label>
       <p className="muted hint">Appliqué tout de suite aux onglets Galaxia ouverts, sans les recharger.</p>
     </section>
   );
