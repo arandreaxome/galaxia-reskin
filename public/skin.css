@@ -556,7 +556,7 @@ html.radar-skin :is(.status-line.pirate, .exp-pirates h4, .exp-aliens h4, .exp-l
   color: var(--c-ivory) !important;
 }
 
-html.radar-skin :is(.fl-count, .sys-deep, .combat-replay, .combat-replay.wide, .rtree-scroll, .galaxy-nav.floating, .fleet-card, .login-card, .bottom-nav-wrap, .threat-more) {
+html.radar-skin :is(.fl-count, .sys-deep, .combat-replay, .combat-replay.wide, .galaxy-nav.floating, .fleet-card, .login-card, .bottom-nav-wrap, .threat-more) {
   background: var(--c-black) !important;
 }
 
@@ -1307,4 +1307,47 @@ html.radar-skin .pv::before {
     linear-gradient(var(--reco), var(--reco)) 50% calc(50% + 14px) / 1px 10px no-repeat,
     linear-gradient(var(--reco), var(--reco)) calc(50% - 14px) 50% / 10px 1px no-repeat,
     linear-gradient(var(--reco), var(--reco)) calc(50% + 14px) 50% / 10px 1px no-repeat;
+}
+
+/* --------------------------------------------------------------------------
+   Arbre de recherche en calque d'ingénieur : papier millimétré qui défile avec le
+   dessin, liaisons encore à remplir en pointillés, cases à angles vifs, cartouche
+   (en haut à gauche : le bas de la planche est occupé par les dernières recherches).
+   -------------------------------------------------------------------------- */
+
+html.radar-skin .rtree-scroll {
+  position: relative;
+  background:
+    linear-gradient(rgb(92 107 92 / 24%) 1px, transparent 1px) 0 0 / 50px 50px,
+    linear-gradient(90deg, rgb(92 107 92 / 24%) 1px, transparent 1px) 0 0 / 50px 50px,
+    linear-gradient(rgb(92 107 92 / 10%) 1px, transparent 1px) 0 0 / 10px 10px,
+    linear-gradient(90deg, rgb(92 107 92 / 10%) 1px, transparent 1px) 0 0 / 10px 10px,
+    var(--c-black) !important;
+  background-attachment: local !important;
+}
+
+html.radar-skin .rt-edge:not(.met) path {
+  stroke-dasharray: 4 3;
+}
+
+html.radar-skin .rt-node rect {
+  rx: 1px;
+}
+
+html.radar-skin .rt-edge text {
+  font-family: var(--skin-typewriter);
+}
+
+html.radar-skin .rtree-scroll::after {
+  content: 'PLANCHE N\B0  1 \B7  ARBRE TECHNOLOGIQUE';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 5px 9px;
+  color: var(--c-ivory-2);
+  font: 400 10px / 1 var(--skin-typewriter);
+  letter-spacing: 0.14em;
+  background: var(--c-black);
+  border: 1px solid var(--c-ivory-3);
+  pointer-events: none;
 }
