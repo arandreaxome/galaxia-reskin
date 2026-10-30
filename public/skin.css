@@ -1,0 +1,1065 @@
+/* ==========================================================================
+   Habillage « état-major » du site Galaxia, injecté par l'extension.
+   Toutes les règles dépendent de html.radar-skin : content.js pose cette classe
+   quand le réglage est coché, et la retire sinon. Même palette que la popup
+   (src/popup/popup.css). Le jeu définit ses couleurs par variables CSS : on les
+   redéfinit d'abord, puis on corrige ce qu'il code en dur (dégradés, lueurs).
+   ========================================================================== */
+
+html.radar-skin {
+  /* Palette */
+  --c-field: #4a5d4a; /* gris-vert militaire mat */
+  --c-field-light: #5c6b5c; /* gris-vert clair */
+  --c-olive: #3a4a3a; /* vert olive foncé */
+  --c-black: #1a1a1a; /* noir profond */
+  --c-anthracite: #2c2c2c; /* gris anthracite */
+  --c-ivory: #e8e4d9; /* blanc cassé, ivoire */
+  --c-red: #6b1e1e; /* rouge sombre : états actifs et alertes uniquement */
+  /* Teintes d'époque ajoutées pour distinguer les catégories de la galaxie, mates et sourdes. */
+  --c-brass: #9c8452; /* laiton : autres joueurs, flottes neutres */
+  --c-steel: #6e8090; /* acier : guilde et alliés */
+  --c-brick: #b4503f; /* brique : pirates et hostiles, lisible là où le rouge sombre ne l'est pas */
+  --c-ivory-2: rgb(232 228 217 / 72%);
+  --c-ivory-3: rgb(232 228 217 / 58%);
+  --skin-font: 'Avenir Next Condensed', 'Bahnschrift SemiCondensed', Bahnschrift, 'Roboto Condensed', 'Arial Narrow', system-ui, sans-serif;
+
+  /* Variables du jeu, ramenées à la palette */
+  --bg: var(--c-black);
+  --surface: var(--c-anthracite);
+  --surface-2: var(--c-black);
+  --surface-3: var(--c-olive);
+  --line: var(--c-olive);
+  --line-2: var(--c-field);
+  --text: var(--c-ivory);
+  --text-2: var(--c-ivory-2);
+  --muted: var(--c-ivory-3);
+  --accent: var(--c-ivory);
+  --accent-2: var(--c-ivory);
+  --accent-fill: var(--c-field);
+  --accent-fill-hover: var(--c-field-light);
+  --accent-soft: rgb(74 93 74 / 45%);
+  --good: var(--c-ivory);
+  --warn: var(--c-ivory);
+  --bad: var(--c-red);
+  --danger-soft: rgb(107 30 30 / 55%);
+  --metal: var(--c-ivory);
+  --crystal: var(--c-ivory-2);
+  --deuterium: var(--c-ivory-3);
+  --energy: var(--c-ivory);
+  --own: var(--c-ivory);
+  --ally: var(--c-steel);
+  --neutral: var(--c-brass);
+  --hostile: var(--c-brick);
+  --radius: 2px;
+  --mono: var(--skin-font);
+
+  color-scheme: dark;
+  scrollbar-color: var(--c-field) var(--c-black);
+}
+
+/* --------------------------------------------------------------------------
+   Base : fond mat, police condensée, aucun relief
+   -------------------------------------------------------------------------- */
+
+/* Le jeu pose son image de fond en style inline : !important obligatoire. */
+html.radar-skin,
+html.radar-skin body {
+  background: var(--c-black) !important;
+}
+
+html.radar-skin body {
+  background-image: none !important;
+  color: var(--c-ivory);
+  font-family: var(--skin-font);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+html.radar-skin :is(button, input, select, textarea) {
+  font-family: inherit;
+}
+
+html.radar-skin *,
+html.radar-skin *::before,
+html.radar-skin *::after {
+  text-shadow: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+html.radar-skin :not(img) {
+  filter: none !important;
+}
+
+/* Images (planètes, bâtiments, vaisseaux) : désaturées, pour rester dans la palette. */
+html.radar-skin img {
+  filter: grayscale(0.75) contrast(1.05) !important;
+}
+
+html.radar-skin ::selection {
+  color: var(--c-ivory);
+  background: var(--c-field);
+}
+
+html.radar-skin :focus-visible {
+  outline: 1px solid var(--c-ivory);
+  outline-offset: 1px;
+}
+
+html.radar-skin ::-webkit-scrollbar-track {
+  background: var(--c-black);
+}
+
+html.radar-skin ::-webkit-scrollbar-thumb,
+html.radar-skin ::-webkit-scrollbar-thumb:hover {
+  background: var(--c-field);
+  border-radius: 2px;
+}
+
+html.radar-skin :is(h1, h2, h3, h4, .brand-txt b, .sim-verdict b, .login-logo h1) {
+  font-family: var(--skin-font);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Décors : étoiles, nébuleuse, halos (le halo de la carte devient l'écran du sonar, plus bas). */
+html.radar-skin :is(.stars, .nebula, .pv-halo, .threat-halo) {
+  display: none !important;
+}
+
+html.radar-skin :is(.pv-body, .pv-body img, .pv-orbit-spin, .sys-star, .pill.danger, .fl-blip svg) {
+  animation: none !important;
+}
+
+/* Angles vifs partout, sauf ce qui est rond par nature (planètes, pastilles). */
+html.radar-skin
+  :is(input, select, textarea, .btn, .icon-btn, .rail a, .bottom-nav a, .release, .res, .shortcut, .pill, .popover, .banner, .chip, .prod-item, .pswitch button, .notice, .guide-steps li, .activity-icon, .toast, .inv-visual, .irow .icon, .fleet-card, .move, .icon) {
+  border-radius: 2px !important;
+}
+
+/* --------------------------------------------------------------------------
+   Barre du haut et navigation
+   -------------------------------------------------------------------------- */
+
+html.radar-skin .topbar {
+  background: var(--c-black) !important;
+  border-bottom: 1px solid var(--c-olive);
+}
+
+html.radar-skin .logo {
+  background: var(--c-field) !important;
+}
+
+html.radar-skin .res {
+  background: var(--c-anthracite);
+  border: 1px solid var(--c-olive);
+}
+
+html.radar-skin .rail {
+  background: var(--c-black);
+  border-right: 1px solid var(--c-olive);
+}
+
+html.radar-skin :is(.rail, .bottom-nav) a {
+  color: var(--c-ivory-3);
+  border-left: 2px solid transparent;
+}
+
+html.radar-skin :is(.rail, .bottom-nav) a:hover {
+  color: var(--c-ivory);
+  background: var(--c-anthracite);
+}
+
+html.radar-skin :is(.rail, .bottom-nav) a.active {
+  color: var(--c-ivory);
+  background: var(--c-olive);
+  border-left-color: var(--c-red);
+}
+
+html.radar-skin .nav-label {
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+html.radar-skin :is(.nav-more.left, .nav-more.right) {
+  background: var(--c-black) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Boutons, champs, pastilles
+   -------------------------------------------------------------------------- */
+
+html.radar-skin .btn {
+  color: var(--c-ivory);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--c-anthracite);
+  border: 1px solid var(--c-field);
+}
+
+html.radar-skin .btn:hover:not(:disabled) {
+  background: var(--c-olive);
+  border-color: var(--c-field-light);
+}
+
+html.radar-skin .btn.primary {
+  background: var(--c-field);
+  border-color: var(--c-field-light);
+}
+
+html.radar-skin .btn.primary:hover:not(:disabled) {
+  background: var(--c-field-light);
+}
+
+html.radar-skin .btn.ghost {
+  background: transparent;
+}
+
+html.radar-skin :is(.btn.danger, .btn.ghost.danger),
+html.radar-skin .btn:active:not(:disabled) {
+  color: var(--c-ivory);
+  background: var(--c-red);
+  border-color: var(--c-red);
+}
+
+html.radar-skin .btn:disabled {
+  opacity: 0.45;
+}
+
+html.radar-skin .icon-btn {
+  color: var(--c-ivory-2);
+  background: transparent;
+}
+
+html.radar-skin .icon-btn:hover {
+  color: var(--c-ivory);
+  background: var(--c-olive);
+}
+
+html.radar-skin :is(input, select, textarea) {
+  color: var(--c-ivory);
+  background: var(--c-black);
+  border: 1px solid var(--c-field);
+}
+
+html.radar-skin :is(input, select, textarea):focus {
+  border-color: var(--c-field-light);
+  outline: 1px solid var(--c-ivory);
+}
+
+html.radar-skin .pill {
+  color: var(--c-ivory);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--c-olive);
+  border: 1px solid var(--c-field);
+}
+
+html.radar-skin .chip {
+  color: var(--c-ivory-2);
+  background: var(--c-anthracite);
+  border: 1px solid var(--c-olive);
+}
+
+html.radar-skin .pswitch button.active {
+  border-color: var(--c-ivory);
+}
+
+html.radar-skin :is(.pack-card.on, .poll-card.on) {
+  outline: 1px solid var(--c-ivory);
+}
+
+/* Le rouge sombre est illisible en texte sur fond noir : « manque », « erreur »
+   et « plein » passent par un fond rouge, texte ivoire. */
+html.radar-skin :is(.bad, .error, .cost .missing, .res.neg b, .res.full b, .gmap-info dd.bad) {
+  color: var(--c-ivory) !important;
+  background: var(--c-red);
+  border-radius: 2px;
+}
+
+/* Rembourrage de pastille pour le texte en ligne seulement : cellules et verdicts gardent le leur. */
+html.radar-skin :is(.bad, .error, .cost .missing, .res.neg b, .res.full b, .gmap-info dd.bad):not(td, .sim-verdict) {
+  padding: 0 0.25em;
+}
+
+html.radar-skin :is(.pill.danger, .chip.bad, .chip.danger, .energy-badge.bad, .threat-banner, .banner.under-attack, .toast.error) {
+  color: var(--c-ivory) !important;
+  background: var(--c-red) !important;
+  border-color: var(--c-red) !important;
+}
+
+/* Une case « manque » vide (aucune perte) ne doit pas apparaître en rouge
+   (même liste que la règle du fond, pour peser autant qu'elle). */
+html.radar-skin :is(.bad, .error, .cost .missing, .res.neg b, .res.full b, .gmap-info dd.bad):empty {
+  padding: 0;
+  background: none;
+}
+
+/* --------------------------------------------------------------------------
+   Jauges, icônes, panneaux flottants
+   -------------------------------------------------------------------------- */
+
+html.radar-skin .progress {
+  background: var(--c-black);
+}
+
+html.radar-skin .progress div,
+html.radar-skin .guide-bar span {
+  background: var(--c-field-light) !important;
+}
+
+html.radar-skin .progress.full div {
+  background: var(--c-red) !important;
+}
+
+html.radar-skin .power-range {
+  background: var(--c-olive) !important;
+}
+
+html.radar-skin .dot-metal {
+  background: var(--metal) !important;
+}
+
+html.radar-skin .dot-crystal {
+  background: var(--crystal) !important;
+}
+
+html.radar-skin .dot-deuterium {
+  background: var(--deuterium) !important;
+}
+
+html.radar-skin .dot-energy {
+  background: var(--energy) !important;
+}
+
+html.radar-skin :is(.icon, .icon.icon-img.cutout, .guide, .pv-fallback) {
+  background: var(--c-black) !important;
+}
+
+html.radar-skin :is(.popover, .toast) {
+  color: var(--c-ivory);
+  background: var(--c-anthracite);
+  border: 1px solid var(--c-field);
+}
+
+html.radar-skin .pv-shield {
+  background: none !important;
+  border: 1px dashed var(--c-field-light);
+}
+
+/* --------------------------------------------------------------------------
+   Flottes et vue Galaxie : les couleurs portent le camp, on les garde distinctes
+   -------------------------------------------------------------------------- */
+
+html.radar-skin .fleet-card.side-own {
+  border-color: var(--c-ivory-3) !important;
+}
+
+html.radar-skin .fleet-card.side-hostile {
+  border-color: var(--c-red) !important;
+}
+
+html.radar-skin .fleet-card.side-neutral {
+  border-color: var(--c-field-light) !important;
+}
+
+html.radar-skin .sys-star {
+  background: var(--c-field-light) !important;
+}
+
+html.radar-skin .sys-ring {
+  border-color: rgb(74 93 74 / 55%) !important;
+}
+
+/* Planètes : une forme et une couleur par catégorie, comme les symboles d'une carte d'état-major.
+   Vous : cercle ivoire épais. Guilde : double cercle acier. Joueur : carré laiton.
+   Pirates : losange brique sur fond rouge. Inhabitée : cercle pointillé gris-vert. Inconnue : « ? »
+   en haut à gauche, car le jeu place les débris et la lune en haut à droite.
+   Carré et losange sont dessinés derrière l'image ; isolation les garde au-dessus de l'écran du sonar. */
+html.radar-skin .sys-planet {
+  isolation: isolate;
+}
+
+html.radar-skin .sys-planet.mine {
+  border: 3px solid var(--c-ivory);
+}
+
+html.radar-skin .sys-planet.ally {
+  border: 2px solid var(--c-steel);
+  outline: 2px solid var(--c-steel);
+  outline-offset: 2px;
+}
+
+html.radar-skin :is(.sys-planet.player, .sys-planet.pirate) {
+  border-color: transparent;
+}
+
+html.radar-skin :is(.sys-planet.player, .sys-planet.pirate)::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  z-index: -1;
+  border: 2px solid var(--c-brass);
+  border-radius: 2px;
+}
+
+html.radar-skin .sys-planet.pirate::before {
+  background: rgb(107 30 30 / 45%);
+  border-color: var(--c-brick);
+  transform: rotate(45deg);
+}
+
+html.radar-skin .sys-planet.empty {
+  border: 2px dotted var(--c-field-light);
+}
+
+html.radar-skin .sys-planet.unknown::after {
+  content: '?';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  color: var(--c-ivory-2);
+  font: 700 10px / 1 var(--skin-font);
+  background: var(--c-black);
+  border: 1px solid var(--c-ivory-3);
+  border-radius: 50%;
+}
+
+html.radar-skin .sys-planet.unknown img {
+  filter: grayscale(1) brightness(0.55) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Couleurs et arrondis codés en dur par le jeu (relevés page par page)
+   -------------------------------------------------------------------------- */
+
+html.radar-skin
+  :is(button:not(.sys-planet), label, li, summary, .tag, .energy-badge, .projection, .irow-level, .irow-note, .release-version, .change-type, .plan-card, .battle-banner, .notice, .sim-verdict, .status-line) {
+  border-radius: 2px !important;
+}
+
+html.radar-skin .banner {
+  background: var(--c-black) !important;
+  border: 1px solid var(--c-olive);
+}
+
+html.radar-skin :is(.pv-orbit, .logo::after) {
+  border-color: rgb(232 228 217 / 22%) !important;
+}
+
+html.radar-skin .pv-orbit-spin i::after {
+  background: var(--c-ivory) !important;
+}
+
+html.radar-skin :is(.prod-item, .pswitch button, .pill:hover, .energy-badge, .inv-visual, .inv-visual.accel, .inv-visual.boost, .pill.boost, .expedition-row td) {
+  color: var(--c-ivory);
+  background: var(--c-anthracite) !important;
+  border-color: var(--c-olive) !important;
+}
+
+html.radar-skin :is(.pswitch button.active, .pill.active, .tag, .proj-bar, .irow-level, .table tr.mine td, .guild-members tr.mine, .table tbody tr:hover td, .threat-banner.friendly) {
+  background: var(--c-olive) !important;
+}
+
+html.radar-skin .irow-level {
+  color: var(--c-ivory);
+  border: 1px solid var(--c-field);
+}
+
+html.radar-skin :is(.badge, .sys-planet, .msg-list b, .inv-visual.pic b, .pill.danger .pill-icon, .pill.danger .pill-time, .pill.boost .pill-icon, .pill.boost .pill-time) {
+  color: var(--c-ivory) !important;
+}
+
+html.radar-skin .icon.icon-img.cutout {
+  color: var(--c-ivory);
+  border-color: var(--c-olive) !important;
+}
+
+html.radar-skin :is(.irow.busy, .notice, .guide, .guide-count, .panel.registrations, .bubble.mine, .threat-banner.friendly) {
+  border-color: var(--c-field-light) !important;
+}
+
+/* Mouvements : le sens de navigation se lit à la couleur (la mission est déjà dans l'étiquette).
+   Aller : liseré ivoire. Retour : liseré gris-vert sur fond teinté, « Retour » en pastille.
+   Sur place ou en attente : liseré en pointillés. Flottes hostiles : rouge. */
+html.radar-skin .move.state-out:not(.foreign) {
+  border-left-color: var(--c-ivory) !important;
+}
+
+html.radar-skin .move.state-back:not(.foreign) {
+  background: rgb(74 93 74 / 30%) !important;
+  border-left-color: var(--c-field-light) !important;
+}
+
+html.radar-skin .move.state-back:not(.foreign) .state {
+  padding: 0 0.35em;
+  background: var(--c-field);
+  border-radius: 2px;
+}
+
+html.radar-skin .move:is(.state-hold, .state-wait):not(.foreign) {
+  border-left-style: dashed !important;
+  border-left-color: var(--c-ivory-2) !important;
+}
+
+html.radar-skin .move.foreign.friendly {
+  border-left-color: var(--c-field) !important;
+}
+
+html.radar-skin .move.foreign.hostile {
+  background: rgb(107 30 30 / 35%) !important;
+}
+
+html.radar-skin :is(.notice.warn, .plan-card, .battle-banner, .danger-zone) {
+  background: var(--c-anthracite) !important;
+  border-color: var(--c-red) !important;
+}
+
+html.radar-skin .pirate-row td {
+  background: rgb(107 30 30 / 25%) !important;
+}
+
+html.radar-skin .pirate-tag {
+  padding: 0 0.25em;
+  color: var(--c-ivory) !important;
+  background: var(--c-red);
+}
+
+html.radar-skin :is(.status-line.pirate, .exp-pirates h4, .exp-aliens h4, .exp-lost h4, .report.raid.invasion p:first-child, .slot-debris, .sys-deep svg + svg) {
+  color: var(--c-ivory) !important;
+}
+
+html.radar-skin :is(.fl-count, .sys-deep, .combat-replay, .combat-replay.wide, .rtree-scroll, .galaxy-nav.floating, .fleet-card, .login-card, .bottom-nav-wrap, .threat-more) {
+  background: var(--c-black) !important;
+}
+
+html.radar-skin .sys-deep {
+  border: 1px solid var(--c-olive);
+}
+
+html.radar-skin .sys-debris {
+  color: var(--c-black) !important;
+  background: var(--c-ivory) !important;
+}
+
+html.radar-skin :is(.chip-btn, .guide-steps li.done .guide-mark) {
+  color: var(--c-ivory);
+  background: var(--c-field) !important;
+  border-color: var(--c-field-light) !important;
+}
+
+html.radar-skin .chip-btn:hover {
+  background: var(--c-field-light) !important;
+}
+
+html.radar-skin .guide-steps li.done .guide-text {
+  color: var(--c-ivory-3);
+}
+
+html.radar-skin :is(.power-range::-webkit-slider-thumb) {
+  background: var(--c-ivory);
+}
+
+html.radar-skin .sys-planet.sel {
+  outline-color: var(--c-ivory) !important;
+}
+
+/* Arbre de recherche et cartes de la galaxie et de l'univers (SVG) */
+html.radar-skin .rt-edge path {
+  stroke: var(--c-olive) !important;
+}
+
+html.radar-skin :is(.rt-edge.met path, .rt-node.done rect) {
+  stroke: var(--c-field-light) !important;
+}
+
+html.radar-skin .rt-node.hot rect {
+  fill: var(--c-field) !important;
+}
+
+html.radar-skin :is(.rt-node.sel rect, .rt-node:focus-visible rect) {
+  stroke: var(--c-ivory) !important;
+}
+
+html.radar-skin :is(.gmap-dust circle, .gsys-star) {
+  fill: var(--c-field-light) !important;
+}
+
+html.radar-skin :is(.gsys.viewed .gsys-star, .gsys:hover .gsys-star) {
+  fill: var(--c-ivory) !important;
+}
+
+html.radar-skin :is(.gsys.sel .gsys-hit, .ugal:hover .ugal-hit) {
+  fill: rgb(74 93 74 / 45%) !important;
+}
+
+html.radar-skin .sys-ring.deep {
+  border-color: var(--c-olive) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Codes couleur du jeu, rendus dans la palette. Seul l'ivoire est lisible en
+   texte : les états passent par des fonds et des bordures, sur une échelle
+   unique. Favorable : fond gris-vert. À surveiller : olive bordé de pointillés.
+   Défavorable ou hostile : rouge sombre.
+   -------------------------------------------------------------------------- */
+
+/* Favorable : victoire, valeur positive, en ligne, capteurs actifs, nouveautés du journal */
+html.radar-skin :is(.good, .sensor-line, .change-type.new, .change-type.improved):not(.sim-verdict) {
+  color: var(--c-ivory) !important;
+  background: var(--c-field);
+  border-color: var(--c-field) !important;
+  border-radius: 2px;
+}
+
+html.radar-skin :is(.good, .sensor-line, .change-type.new, .change-type.improved):not(td, .sim-verdict) {
+  padding: 0 0.3em;
+}
+
+html.radar-skin .change-type.new {
+  background: var(--c-field-light);
+  border-color: var(--c-field-light) !important;
+}
+
+html.radar-skin .sensor-line {
+  width: fit-content;
+}
+
+/* À surveiller : prérequis manquant, énergie réduite, correctif */
+html.radar-skin :is(.warn-text, .missing-req, .power-val.reduced, .change-type.fixed) {
+  padding: 0 0.3em;
+  color: var(--c-ivory) !important;
+  font-weight: 700;
+  background: var(--c-olive);
+  border-color: var(--c-olive) !important;
+  border-radius: 2px;
+  outline: 1px dashed var(--c-ivory-3);
+  outline-offset: -1px;
+}
+
+html.radar-skin .missing-req {
+  width: fit-content;
+}
+
+/* Camp hostile (défenseur pirate, flotte ennemie) : texte ivoire souligné de brique ;
+   les icônes tactiques prennent la brique par la variable --hostile. */
+html.radar-skin :not(svg).side-hostile {
+  color: var(--c-ivory) !important;
+  text-decoration: underline 2px var(--c-brick);
+  text-underline-offset: 3px;
+}
+
+/* Simulateur et rapports : la boîte du verdict reprend l'échelle. */
+html.radar-skin .sim-verdict {
+  border-style: solid;
+  border-width: 1px;
+}
+
+html.radar-skin .sim-verdict.good {
+  background: rgb(74 93 74 / 55%) !important;
+  border-color: var(--c-field-light) !important;
+}
+
+html.radar-skin .sim-verdict.mid {
+  background: var(--c-olive) !important;
+  border: 1px dashed var(--c-ivory-3) !important;
+}
+
+html.radar-skin .sim-verdict.bad {
+  background: rgb(107 30 30 / 60%) !important;
+  border-color: var(--c-red) !important;
+}
+
+html.radar-skin :is(.sim-verdict.good, .sim-verdict.mid, .sim-verdict.bad) b {
+  padding: 0;
+  color: var(--c-ivory) !important;
+  background: none;
+}
+
+/* Galaxie : chaque ligne de la liste du système reprend le symbole de son occupant (● ◎ □ ◆ ○ ?)
+   et un liseré propre à sa catégorie ; le texte reste ivoire. */
+html.radar-skin .status-line {
+  color: var(--c-ivory) !important;
+}
+
+html.radar-skin .status-line::before {
+  display: inline-block;
+  width: 1.3em;
+  font-weight: 700;
+}
+
+html.radar-skin .status-line.mine::before {
+  content: '●';
+  color: var(--c-ivory);
+}
+
+html.radar-skin .status-line.ally::before {
+  content: '◎';
+  color: var(--c-steel);
+}
+
+html.radar-skin .status-line.player::before {
+  content: '□';
+  color: var(--c-brass);
+}
+
+html.radar-skin .status-line.pirate::before {
+  content: '◆';
+  color: var(--c-brick);
+}
+
+html.radar-skin .status-line.empty::before {
+  content: '○';
+  color: var(--c-field-light);
+}
+
+html.radar-skin .status-line.unknown::before {
+  content: '?';
+  color: var(--c-ivory-3);
+}
+
+html.radar-skin .slot-list li {
+  border-left: 3px solid transparent;
+}
+
+html.radar-skin .slot-list li:has(.status-line.mine) {
+  background: rgb(232 228 217 / 6%);
+  border-left: 4px solid var(--c-ivory);
+}
+
+html.radar-skin .slot-list li:has(.status-line.ally) {
+  background: rgb(110 128 144 / 22%);
+  border-left: 5px double var(--c-steel);
+}
+
+html.radar-skin .slot-list li:has(.status-line.player) {
+  background: rgb(156 132 82 / 14%);
+  border-left: 3px dashed var(--c-brass);
+}
+
+html.radar-skin .slot-list li:has(.status-line.pirate) {
+  background: rgb(107 30 30 / 32%);
+  border-left: 4px solid var(--c-brick);
+}
+
+html.radar-skin .slot-list li:has(.status-line.empty) {
+  border-left: 3px dotted var(--c-field-light);
+}
+
+html.radar-skin .slot-list li:has(.status-line.unknown) .status-line {
+  color: var(--c-ivory-3) !important;
+}
+
+html.radar-skin .slot-list li.sel {
+  outline: 1px solid var(--c-ivory);
+  outline-offset: -1px;
+}
+
+/* Panneau de sélection : l'occupant en pastille. */
+html.radar-skin p.status-line {
+  width: fit-content;
+  padding: 2px 6px;
+}
+
+html.radar-skin p.status-line.pirate {
+  background: var(--c-red);
+}
+
+html.radar-skin p.status-line.empty {
+  background: var(--c-field);
+}
+
+html.radar-skin p.status-line.ally {
+  background: var(--c-steel);
+}
+
+html.radar-skin p.status-line.player {
+  outline: 1px dashed var(--c-brass);
+  outline-offset: -1px;
+}
+
+html.radar-skin p.status-line.mine {
+  outline: 1px solid var(--c-ivory);
+  outline-offset: -1px;
+}
+
+/* Légende (vues Système et Galaxie) : les mêmes formes que sur la carte. */
+html.radar-skin .lg {
+  vertical-align: -1px;
+}
+
+html.radar-skin .lg.mine {
+  border: 3px solid var(--c-ivory) !important;
+}
+
+html.radar-skin .lg.ally {
+  border: 1.5px solid var(--c-steel) !important;
+  outline: 1.5px solid var(--c-steel);
+  outline-offset: 1.5px;
+}
+
+html.radar-skin .lg.player {
+  border: 2px solid var(--c-brass) !important;
+  border-radius: 1px !important;
+}
+
+html.radar-skin .lg.pirate {
+  background: rgb(107 30 30 / 45%);
+  border: 2px solid var(--c-brick) !important;
+  border-radius: 1px !important;
+  transform: rotate(45deg) scale(0.85);
+}
+
+html.radar-skin .lg.empty {
+  border: 2px dotted var(--c-field-light) !important;
+}
+
+html.radar-skin .lg.unknown {
+  display: inline-grid;
+  place-items: center;
+  border: none !important;
+  opacity: 1 !important;
+}
+
+html.radar-skin .lg.unknown::after {
+  content: '?';
+  color: var(--c-ivory-2);
+  font: 700 11px / 1 var(--skin-font);
+}
+
+/* Vue Galaxie : repères des systèmes et cœur de la galaxie, dans la palette. */
+html.radar-skin .gsys-intel.pirate {
+  fill: var(--c-brick);
+  stroke: none;
+}
+
+html.radar-skin .gsys-intel.player {
+  fill: none;
+  stroke: var(--c-brass);
+  stroke-width: 1.5px;
+}
+
+html.radar-skin .gsys-intel.empty {
+  fill: var(--c-field-light);
+  stroke: none;
+}
+
+html.radar-skin #gmap-core stop:nth-child(1) {
+  stop-color: var(--c-ivory);
+}
+
+html.radar-skin #gmap-core stop:nth-child(2) {
+  stop-color: var(--c-field-light);
+}
+
+html.radar-skin #gmap-core stop:nth-child(3) {
+  stop-color: var(--c-field);
+}
+
+/* Alliés : étiquette de guilde en pastille gris-vert. */
+html.radar-skin .gtag.ally {
+  padding: 0 0.25em;
+  color: var(--c-ivory) !important;
+  background: var(--c-steel);
+  border-radius: 2px;
+}
+
+/* Relecture d'un combat : le bandeau des deux camps en ivoire, le défenseur souligné de rouge. */
+html.radar-skin .cr-hud > div {
+  color: var(--c-ivory) !important;
+}
+
+html.radar-skin .cr-hud > div:last-child b {
+  text-decoration: underline 2px var(--c-brick);
+  text-underline-offset: 3px;
+}
+
+/* En-têtes des camps dans le champ de bataille (texte SVG, coloré par fill). */
+html.radar-skin .cr-field .cr-head {
+  fill: var(--c-ivory) !important;
+}
+
+/* Unités du défenseur, tournées vers la gauche : silhouette rouge plus pleine, visible sur fond noir. */
+html.radar-skin .cr-field .cr-unit > g[transform*='rotate(180'] > g {
+  fill-opacity: 0.6;
+}
+
+/* --------------------------------------------------------------------------
+   Vue Système en écran de sonar : disque sombre, croix de visée, graduation,
+   caps 000-090-180-270 et faisceau de balayage. Tout est dessiné dans les
+   pseudo-éléments de la carte, sans toucher à son contenu ; cqw suit la taille
+   de la carte (conteneur du jeu). Les dégradés ne tracent que des traits nets
+   et la traînée du faisceau, dans la palette.
+   -------------------------------------------------------------------------- */
+
+/* Écran : disque noir et croix de visée. */
+html.radar-skin .sys-glow {
+  inset: 1%;
+  background:
+    linear-gradient(to right, transparent calc(50% - 0.5px), rgb(92 107 92 / 60%) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+    linear-gradient(to bottom, transparent calc(50% - 0.5px), rgb(92 107 92 / 60%) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+    var(--c-black);
+}
+
+/* Graduation au pourtour : un trait tous les 10°, plus marqué tous les 30°. */
+html.radar-skin .sys-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    repeating-conic-gradient(from -0.6deg, rgb(232 228 217 / 70%) 0deg 1.2deg, transparent 1.2deg 30deg),
+    repeating-conic-gradient(from -0.3deg, rgb(232 228 217 / 35%) 0deg 0.6deg, transparent 0.6deg 10deg);
+  -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 2.2cqw), #000 calc(100% - 2.2cqw));
+  mask: radial-gradient(closest-side, transparent calc(100% - 2.2cqw), #000 calc(100% - 2.2cqw));
+}
+
+/* Faisceau : trait ivoire suivi d'une traînée qui s'éteint, un tour en 6 s. */
+html.radar-skin .sys-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(transparent 0deg 290deg, rgb(92 107 92 / 45%) 358deg, rgb(232 228 217 / 75%) 358deg 360deg);
+  animation: radar-sweep 6s linear infinite;
+}
+
+@keyframes radar-sweep {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.radar-skin .sys-glow::after {
+    animation: none;
+  }
+}
+
+/* Caps, en chiffres de cap militaire. */
+html.radar-skin :is(.sysmap, .sys-ring.deep)::before,
+html.radar-skin :is(.sysmap, .sys-ring.deep)::after {
+  position: absolute;
+  z-index: 1;
+  color: var(--c-ivory-3);
+  font: 700 max(9px, 1.8cqw) / 1 var(--skin-font);
+  letter-spacing: 0.12em;
+  pointer-events: none;
+}
+
+html.radar-skin .sysmap::before {
+  content: '270';
+  top: 50%;
+  left: 4cqw;
+  transform: translateY(-50%);
+}
+
+html.radar-skin .sysmap::after {
+  content: '090';
+  top: 50%;
+  right: 4cqw;
+  transform: translateY(-50%);
+}
+
+html.radar-skin .sys-ring.deep::before {
+  content: '000';
+  top: 3cqw;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+html.radar-skin .sys-ring.deep::after {
+  content: '180';
+  bottom: 6.5cqw;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Centre : le point d'émission. */
+html.radar-skin .sys-star {
+  background: var(--c-ivory) !important;
+  transform: scale(0.18);
+}
+
+/* Contacts : planètes teintées comme sur un écran au phosphore vert ; les inconnues restent sombres. */
+html.radar-skin .sysmap .sys-planet img {
+  filter: grayscale(1) sepia(0.5) hue-rotate(45deg) saturate(0.8) brightness(0.9) !important;
+}
+
+html.radar-skin .sysmap .sys-planet.unknown img {
+  filter: grayscale(1) sepia(0.5) hue-rotate(45deg) saturate(0.8) brightness(0.5) !important;
+}
+
+/* Écho d'un contact au passage du faisceau (calque posé par sonar.js) : silhouette qui s'élargit
+   et s'éteint, avec la forme et la couleur du contact sur la carte. Chaque type fixe sa forme,
+   son contour, son remplissage et son ampleur. */
+html.radar-skin .radar-echo {
+  --echo-border: 2px solid rgb(232 228 217 / 85%);
+  --echo-fill: rgb(92 107 92 / 35%);
+  --echo-scale: 2.1;
+  --echo-radius: 50%;
+  --echo-rotate: 0deg;
+  position: fixed;
+  z-index: 4;
+  pointer-events: none;
+  background: var(--echo-fill);
+  border: var(--echo-border);
+  border-radius: var(--echo-radius);
+  transform: translate(-50%, -50%) rotate(var(--echo-rotate)) scale(0.8);
+  animation: radar-echo 1.2s ease-out forwards;
+}
+
+/* Ta planète et tes flottes : cercle ivoire. */
+html.radar-skin .radar-echo:is(.echo-mine, .echo-fleet-own) {
+  --echo-border: 2px solid var(--c-ivory);
+  --echo-fill: rgb(232 228 217 / 22%);
+}
+
+/* Autre joueur, flotte neutre : carré laiton. */
+html.radar-skin .radar-echo:is(.echo-player, .echo-fleet-neutral) {
+  --echo-border: 2px solid var(--c-brass);
+  --echo-fill: rgb(156 132 82 / 25%);
+  --echo-radius: 2px;
+}
+
+/* Guilde : cercle acier. */
+html.radar-skin .radar-echo.echo-ally {
+  --echo-border: 2px solid var(--c-steel);
+  --echo-fill: rgb(110 128 144 / 35%);
+}
+
+/* Repaire pirate, flotte hostile : losange brique sur fond rouge, écho plus large. */
+html.radar-skin .radar-echo:is(.echo-pirate, .echo-fleet-hostile) {
+  --echo-border: 2px solid var(--c-brick);
+  --echo-fill: rgb(107 30 30 / 55%);
+  --echo-scale: 2.3;
+  --echo-radius: 2px;
+  --echo-rotate: 45deg;
+}
+
+/* Position inhabitée : cercle pointillé gris-vert, sans remplissage. */
+html.radar-skin .radar-echo.echo-empty {
+  --echo-border: 2px dotted var(--c-field-light);
+  --echo-fill: transparent;
+}
+
+/* Position inconnue : écho faible. */
+html.radar-skin .radar-echo.echo-unknown {
+  --echo-border: 1px solid rgb(232 228 217 / 35%);
+  --echo-fill: transparent;
+  --echo-scale: 1.6;
+}
+
+@keyframes radar-echo {
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--echo-rotate)) scale(var(--echo-scale));
+  }
+}

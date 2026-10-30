@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Galaxia Radar",
+  "version": "0.1.0",
+  "description": "Notifications et tableau de bord pour Galaxia : files vides, flottes revenues, stockage plein, flottes hostiles.",
+  "permissions": ["alarms", "notifications", "storage"],
+  "host_permissions": ["https://galaxia.eldau.xyz/*"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "content_scripts": [
+    { "matches": ["https://galaxia.eldau.xyz/*"], "js": ["hook.js"], "run_at": "document_start", "world": "MAIN" },
+    { "matches": ["https://galaxia.eldau.xyz/*"], "js": ["content.js", "sonar.js"], "css": ["skin.css", "skin-assets.css"], "run_at": "document_start" }
+  ],
+  "web_accessible_resources": [{ "resources": ["skin/*"], "matches": ["https://galaxia.eldau.xyz/*"] }],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Galaxia Radar",
+    "default_icon": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" }
+  },
+  "icons": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" }
+}

@@ -1,0 +1,26 @@
+# Dépendances
+node_modules/
+
+# Build de l'extension (vite build)
+dist/
+
+# Extension empaquetée et clé de signature
+*.zip
+*.crx
+*.pem
+
+# Logs et caches
+*.log
+npm-debug.log*
+*.tsbuildinfo
+.vite/
+
+# Environnement local
+.env
+.env.*
+
+# Système et éditeurs
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json

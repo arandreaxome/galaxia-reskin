@@ -1,0 +1,715 @@
+/* ==========================================================================
+   Thème « état-major » : austère, utilitaire, surfaces mates.
+   Toutes les teintes viennent des sept couleurs de la palette ; les nuances
+   (textes secondaires) sont obtenues par opacité, jamais par une autre teinte.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* Palette */
+  --c-field: #4a5d4a; /* gris-vert militaire mat */
+  --c-field-light: #5c6b5c; /* gris-vert clair */
+  --c-olive: #3a4a3a; /* vert olive foncé */
+  --c-black: #1a1a1a; /* noir profond */
+  --c-anthracite: #2c2c2c; /* gris anthracite */
+  --c-ivory: #e8e4d9; /* blanc cassé, ivoire */
+  --c-red: #6b1e1e; /* rouge sombre : états actifs et alertes uniquement */
+
+  /* Rôles : ajuster ici plutôt que dans les règles */
+  --bg: var(--c-black); /* fond de la popup */
+  --surface: var(--c-anthracite); /* cartes, boutons, champs */
+  --surface-hover: var(--c-olive); /* survol */
+  --selected: var(--c-field); /* élément sélectionné (onglet de filtre, puce) */
+  --accent: var(--c-red); /* actif, appuyé, alerte */
+  --line: var(--c-olive); /* séparateurs */
+  --line-strong: var(--c-field); /* bordures de contrôles */
+  --text: var(--c-ivory); /* texte principal */
+  --text-2: rgb(232 228 217 / 62%); /* texte secondaire : ivoire atténué */
+  --focus: var(--c-ivory); /* contour clavier */
+
+  --radius: 2px;
+  --font: 'Avenir Next Condensed', 'Bahnschrift SemiCondensed', Bahnschrift, 'Roboto Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --size: 13px;
+  --size-small: 11.5px;
+  --size-label: 10.5px;
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+
+* {
+  box-sizing: border-box;
+}
+
+/* Chrome limite la popup à 600 px de haut : le défilement se fait dans body,
+   pour que la barre verticale ne fasse pas apparaître une barre horizontale.
+   Sans overflow sur html, celui de body serait reporté à la fenêtre. */
+html {
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  width: 420px;
+  max-height: 600px;
+  overflow-y: auto;
+  color: var(--text);
+  font: 500 var(--size) / 1.45 var(--font);
+  letter-spacing: 0.01em;
+  background: var(--bg);
+  scrollbar-color: var(--line-strong) var(--bg);
+  scrollbar-width: thin;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  color: var(--c-ivory);
+  background: var(--selected);
+}
+
+main {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1 {
+  font-size: 15px;
+}
+
+h2 {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: var(--size-small);
+}
+
+h2 .muted {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+p {
+  margin: 0;
+}
+
+.muted {
+  color: var(--text-2);
+}
+
+/* À surveiller : texte plein, précédé d'un témoin rouge discret. */
+.warn {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.warn::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  vertical-align: 1px;
+  background: var(--accent);
+}
+
+/* Ouverte en grand dans un onglet : la page défile normalement. */
+html.page {
+  overflow: auto;
+}
+
+html.page body {
+  width: auto;
+  max-width: 860px;
+  max-height: none;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+/* --------------------------------------------------------------------------
+   En-tête et barre d'onglets
+   -------------------------------------------------------------------------- */
+
+header {
+  display: grid;
+  gap: 2px;
+}
+
+header b {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.links {
+  display: flex;
+  gap: 14px;
+}
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tabs button {
+  padding: 7px 12px 6px;
+  color: var(--text-2);
+  font-size: var(--size-small);
+  letter-spacing: 0.12em;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+}
+
+.tabs button:hover,
+.tabs button:active {
+  color: var(--text);
+  background: none;
+}
+
+.tabs button.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+.badge {
+  margin-left: 6px;
+  padding: 0 5px;
+  color: var(--c-ivory);
+  font-size: var(--size-label);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: var(--c-field);
+  border-radius: var(--radius);
+}
+
+.badge.ok {
+  background: var(--c-olive);
+  outline: 1px solid var(--c-field-light);
+  outline-offset: -1px;
+}
+
+.badge.danger {
+  background: var(--accent);
+}
+
+/* --------------------------------------------------------------------------
+   Boutons et liens
+   -------------------------------------------------------------------------- */
+
+button {
+  padding: 5px 11px;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--size-small);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--surface-hover);
+  border-color: var(--c-field-light);
+}
+
+button:active {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+button:focus-visible,
+select:focus-visible {
+  outline: 1px solid var(--focus);
+  outline-offset: 1px;
+}
+
+button.icon {
+  padding: 2px 8px;
+  letter-spacing: 0;
+}
+
+a,
+button.link {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--c-field-light);
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+button.link {
+  padding: 0;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  background: none;
+  border: 0;
+}
+
+a:hover,
+button.link:hover {
+  text-decoration-color: var(--c-ivory);
+  background: none;
+}
+
+footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* --------------------------------------------------------------------------
+   Cartes, tableaux, alertes
+   -------------------------------------------------------------------------- */
+
+.card {
+  padding: 9px 11px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table + table {
+  margin-top: 5px;
+  border-top: 1px solid var(--line);
+}
+
+th {
+  padding: 2px 8px 2px 0;
+  color: var(--text-2);
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+}
+
+td {
+  padding: 2px 0;
+}
+
+td:last-child {
+  text-align: right;
+}
+
+td.num {
+  padding-right: 8px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.alerts {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.alerts li {
+  padding: 5px 8px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--c-field-light);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.alerts li:hover {
+  background: var(--surface-hover);
+}
+
+.alerts li.danger {
+  font-weight: 700;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* --------------------------------------------------------------------------
+   Flottes
+   -------------------------------------------------------------------------- */
+
+.fleet {
+  display: grid;
+  gap: 1px;
+  padding: 5px 0;
+  border-top: 1px solid var(--line);
+}
+
+h2 + .fleet {
+  border-top: 0;
+}
+
+.fleet .tag {
+  margin-right: 6px;
+  padding: 0 4px;
+  color: var(--c-ivory);
+  font-size: var(--size-label);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--c-olive);
+  border-radius: var(--radius);
+}
+
+.fleet.hostile {
+  font-weight: 700;
+}
+
+.fleet.hostile .tag {
+  background: var(--accent);
+}
+
+.fleet .when {
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   Onglet Cibles : barre de filtres
+   -------------------------------------------------------------------------- */
+
+/* Les filtres restent visibles pendant le défilement de la liste. */
+.filters {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: grid;
+  gap: 6px;
+  margin: 0 -10px;
+  padding: 8px 10px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.filters .row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.seg {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+}
+
+.seg button {
+  padding: 3px 8px;
+  color: var(--text-2);
+  letter-spacing: 0.04em;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+
+.seg button + button {
+  border-left: 1px solid var(--line);
+}
+
+.seg button:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.seg button.active {
+  color: var(--c-ivory);
+  background: var(--selected);
+}
+
+.chip {
+  padding: 2px 8px;
+  color: var(--text-2);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.chip:hover {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.chip.active {
+  color: var(--c-ivory);
+  background: var(--selected);
+  border-color: var(--c-field-light);
+}
+
+.chip small {
+  margin-left: 5px;
+  font-size: var(--size-label);
+  opacity: 0.7;
+}
+
+select {
+  padding: 3px 6px;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--size-small);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+}
+
+/* --------------------------------------------------------------------------
+   Onglet Cibles : liste
+   -------------------------------------------------------------------------- */
+
+.empty {
+  padding: 12px 2px;
+}
+
+.target-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sys-head {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 0 2px 3px;
+  color: var(--text-2);
+  font-size: var(--size-label);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.target {
+  border-bottom: 1px solid var(--line);
+}
+
+.target-main {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1px 6px;
+  width: 100%;
+  padding: 6px 2px;
+  color: var(--text);
+  font-size: var(--size);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-align: left;
+  text-transform: none;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+
+.target-main:hover {
+  background: var(--surface);
+}
+
+.target-main:active {
+  background: var(--surface-hover);
+}
+
+.target-main:focus-visible {
+  outline-offset: -1px;
+}
+
+.coords {
+  color: var(--text-2);
+  font-size: var(--size-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.lvl {
+  min-width: 26px;
+  padding: 0 4px;
+  color: var(--c-ivory);
+  font-size: var(--size-label);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+  background: var(--c-olive);
+  border: 1px solid var(--c-field);
+  border-radius: var(--radius);
+}
+
+.name {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pill {
+  padding: 1px 6px;
+  font-size: var(--size-label);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+}
+
+.pill.ready {
+  color: var(--c-ivory);
+  background: var(--c-field);
+}
+
+.pill.protected {
+  color: var(--text-2);
+  background: var(--bg);
+  border-color: var(--line-strong);
+}
+
+.pill.respy {
+  color: var(--c-ivory);
+  background: var(--accent);
+}
+
+.pill.unprobed {
+  color: var(--text-2);
+  border: 1px dashed var(--line-strong);
+}
+
+.sub {
+  grid-column: 1 / -1;
+  color: var(--text-2);
+  font-size: var(--size-small);
+}
+
+.details {
+  display: grid;
+  gap: 7px;
+  padding: 4px 2px 10px;
+}
+
+.details dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 10px;
+  margin: 0;
+}
+
+.details dt {
+  padding-top: 2px;
+  color: var(--text-2);
+  font-size: var(--size-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.details dd {
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hint,
+.sources {
+  font-size: var(--size-small);
+}
+
+.sources {
+  margin: 10px 0 0;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+}
+
+/* --------------------------------------------------------------------------
+   Onglet Réglages
+   -------------------------------------------------------------------------- */
+
+.setting {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  cursor: pointer;
+}
+
+.setting > span {
+  display: grid;
+  gap: 3px;
+}
+
+.setting + .setting {
+  margin-top: 12px;
+}
+
+.setting ~ .hint {
+  margin-top: 12px;
+}
+
+.setting .muted {
+  font-size: var(--size-small);
+}
+
+input[type='checkbox'] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 1px 0 0;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+input[type='checkbox']:hover {
+  border-color: var(--c-field-light);
+}
+
+input[type='checkbox']:checked {
+  background: var(--selected);
+  border-color: var(--c-field-light);
+}
+
+/* Coche ivoire, dessinée par deux bordures tournées. */
+input[type='checkbox']:checked::after {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 8px;
+  margin: 2px auto 0;
+  border: solid var(--c-ivory);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+input[type='checkbox']:focus-visible {
+  outline: 1px solid var(--focus);
+  outline-offset: 1px;
+}
