@@ -1,7 +1,7 @@
 /* ==========================================================================
    Habillage « état-major » du site Galaxia, injecté par l'extension.
-   Toutes les règles dépendent de html.radar-skin : content.js pose cette classe
-   quand le réglage est coché, et la retire sinon. Même palette que la popup
+   Toutes les règles dépendent de html.radar-skin (sauf le menu renommé, html.radar-rename) :
+   content.js pose ces classes selon les réglages. Même palette que la popup
    (src/popup/popup.css). Le jeu définit ses couleurs par variables CSS : on les
    redéfinit d'abord, puis on corrige ce qu'il code en dur (dégradés, lueurs).
    ========================================================================== */
@@ -195,6 +195,11 @@ html.radar-skin :is(.rail, .bottom-nav) a.active {
 html.radar-skin .nav-label {
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+/* Renommage (avec ou sans habillage) : les libellés longs passent sur deux lignes, centrées sous l'icône. */
+html.radar-rename .nav-label {
+  text-align: center;
 }
 
 html.radar-skin :is(.nav-more.left, .nav-more.right) {
