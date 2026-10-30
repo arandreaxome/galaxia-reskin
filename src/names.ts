@@ -210,14 +210,23 @@ const pairs = (names: Record<string, string>, theme: Record<string, string>) =>
     .filter(key => names[key] && names[key] !== theme[key])
     .map(key => [names[key], theme[key]] as [string, string]);
 
+// Arbre de recherche : le jeu y raccourcit les noms (sans « Technologie », « Réacteur à » devient « Réact. »).
+const treeName = (key: string) => (key === 'researchLab' ? 'Laboratoire' : NAMES[key].replace('Technologie ', '').replace('Réacteur à ', 'Réact. '));
+
 /** Lexique « nom du jeu → nom du thème » des pages du jeu (rename.ts, injecté au build par vite.config.ts).
  *  inline : remplacé partout dans le texte ; exact : seulement un texte entier (les missions sont des verbes) ;
- *  menu : seulement dans le menu et les titres de page. */
+ *  scoped : seulement un texte entier, dans la zone indiquée (mots trop courants ailleurs). */
 export function lexique() {
   const resources = pairs(RESOURCE_NAMES, RESOURCE_THEME);
+  const tree = Object.keys(THEME)
+    .filter(key => NAMES[key] && treeName(key) !== NAMES[key])
+    .map(key => [treeName(key), THEME[key]] as [string, string]);
   return {
     inline: [...pairs(NAMES, THEME), ...resources, ...resources.map(([from, to]) => [from.toLowerCase(), to.toLowerCase()] as [string, string]), ...WORDS],
     exact: pairs(MISSIONS, MISSION_THEME),
-    menu: Object.entries(MENU_THEME),
+    scoped: [
+      ['.nav-label, h1, .page-head h2', Object.entries(MENU_THEME)],
+      ['.rt-name', tree],
+    ] as [string, [string, string][]][],
   };
 }

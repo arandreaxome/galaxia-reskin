@@ -5,14 +5,13 @@
 declare const __LEXIQUE__: string;
 
 {
-  const LEXIQUE: { inline: [string, string][]; exact: [string, string][]; menu: [string, string][] } = JSON.parse(__LEXIQUE__);
+  const LEXIQUE: { inline: [string, string][]; exact: [string, string][]; scoped: [string, [string, string][]][] } = JSON.parse(__LEXIQUE__);
   const CLASS = 'radar-rename';
   // Champs et textes écrits par les joueurs (discussions, description de guilde) : jamais renommés.
   const SKIP = 'script, style, textarea, input, [contenteditable], .chat-msgs, .chat-input, .bubble, .guild-desc';
-  const MENU = '.nav-label, h1, .page-head h2';
   const inline = new Map(LEXIQUE.inline);
   const exact = new Map(LEXIQUE.exact);
-  const menu = new Map(LEXIQUE.menu);
+  const scoped = LEXIQUE.scoped.map(([selector, entries]) => [selector, new Map(entries)] as const);
   // Noms entiers seulement (lettres accentuées comprises), le plus long d'abord : « Mine de métal » avant « métal ».
   const names = [...inline.keys()].sort((a, b) => b.length - a.length).map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
   const pattern = new RegExp(`(?<![\\p{L}\\p{N}])(?:${names.join('|')})(?![\\p{L}\\p{N}])`, 'gu');
@@ -24,7 +23,7 @@ declare const __LEXIQUE__: string;
 
   function themed(text: string, parent: Element): string {
     const whole = text.trim();
-    const entire = (parent.closest(MENU) && menu.get(whole)) || exact.get(whole);
+    const entire = scoped.find(([selector, map]) => map.has(whole) && parent.closest(selector))?.[1].get(whole) ?? exact.get(whole);
     return entire ? text.replace(whole, entire) : text.replace(pattern, name => inline.get(name) ?? name);
   }
 
