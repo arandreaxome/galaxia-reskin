@@ -759,3 +759,10 @@ input[type='checkbox']:focus-visible {
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
+
+/* Carte d'une planète (onglet Empire) : coordonnées et ouverture de la planète dans le jeu. */
+.planet-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

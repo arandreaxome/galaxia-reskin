@@ -130,8 +130,8 @@ function scheduleDeadline({ state, offset }: Snapshot) {
 }
 
 function notify(e: GameEvent) {
-  // L'identifiant porte la page du jeu à ouvrir au clic.
-  void chrome.notifications.create(`${e.route}|${e.id}`, {
+  // L'identifiant porte la page du jeu à ouvrir au clic, et la planète à y sélectionner.
+  void chrome.notifications.create(`${e.route}|${e.planet ?? ''}|${e.id}`, {
     type: 'basic',
     iconUrl: ICON,
     title: e.title,
@@ -275,7 +275,8 @@ chrome.runtime.onMessage.addListener((msg: { type?: string; token?: string | nul
 
 chrome.notifications.onClicked.addListener(id => {
   void chrome.notifications.clear(id);
-  void openGame(id.split('|')[0]);
+  const [route, planet] = id.split('|');
+  void openGame(route, planet || undefined);
 });
 
 chrome.alarms.onAlarm.addListener(() => void refresh(true));

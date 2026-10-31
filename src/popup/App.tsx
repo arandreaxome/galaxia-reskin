@@ -22,7 +22,7 @@ type Stored = {
 };
 type Tab = 'empire' | 'targets' | 'debris' | 'settings';
 
-const open = (route = '#/') => void openGame(route);
+const open = (route = '#/', planet?: string) => void openGame(route, planet);
 
 /** Popup ouverte en grand dans un onglet (bouton ⤢ de l'onglet Cibles). */
 const page = new URLSearchParams(location.search).has('page');
@@ -144,7 +144,7 @@ export function App() {
             {list.length ? (
               <ul className="alerts">
                 {list.map((a, i) => (
-                  <li key={i} className={a.level} onClick={() => open(a.route)}>
+                  <li key={i} className={a.level} onClick={() => open(a.route, a.planet)}>
                     {a.text}
                   </li>
                 ))}
@@ -177,7 +177,13 @@ function PlanetCard({ planet: p, now }: { planet: Planet; now: number }) {
   return (
     <section className="card">
       <h2>
-        {p.name} <span className="muted">{coords(p)}</span>
+        {p.name}
+        <span className="planet-head">
+          <span className="muted">{coords(p)}</span>
+          <button className="icon goto" title={`Ouvrir ${p.name} dans le jeu`} onClick={() => open('#/', p.id)}>
+            ↗
+          </button>
+        </span>
       </h2>
       <table>
         <tbody>

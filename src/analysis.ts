@@ -3,15 +3,23 @@
 
 import { clock, coords, duration, num, place } from './format';
 import { label, missionName, resourceName } from './names';
-import type { Fleet, GameState, Message, Planet, Resource, Resources, SocialCounter } from './types';
+import type { Coords, Fleet, GameState, Message, Planet, Resource, Resources, SocialCounter } from './types';
 
 export const RESOURCES: Resource[] = ['metal', 'crystal', 'deuterium'];
 
 /** Un stockage est signalé quand il sera plein dans moins de 30 min. */
 export const STORAGE_WARNING = 30 * 60_000;
 
-export type Alert = { level: 'danger' | 'warning'; text: string; route: string };
-export type GameEvent = { id: string; level: 'danger' | 'info'; title: string; message: string; route: string };
+/** `planet` : planète à sélectionner dans le jeu avant d'ouvrir la page (openGame). */
+export type Alert = { level: 'danger' | 'warning'; text: string; route: string; planet?: string };
+export type GameEvent = { id: string; level: 'danger' | 'info'; title: string; message: string; route: string; planet?: string };
+
+/** Ta planète (ou lune) à ces coordonnées. */
+const ownAt = (s: GameState, c: Coords) => s.planets.find(p => p.g === c.g && p.s === c.s && p.p === c.p && Boolean(p.moon) === Boolean(c.moon));
+
+/** Planète au meilleur laboratoire : une recherche s'y lance le plus vite. */
+const bestLab = (s: GameState) =>
+  s.planets.reduce<Planet | undefined>((best, p) => ((p.buildings.researchLab ?? 0) > (best?.buildings.researchLab ?? 0) ? p : best), undefined);
 
 /** Ce que le service worker retient d'un relevé à l'autre pour ne rien notifier deux fois. */
 export type Memory = {
@@ -86,21 +94,22 @@ export function alerts(s: GameState, now: number): Alert[] {
         level: 'danger',
         text: `${foreignLabel(f)} vers ${place(f.targetName, f.target)} : impact dans ${duration(f.arriveAt - now)}`,
         route: '#/fleet',
+        planet: ownAt(s, f.target)?.id,
       });
     }
   }
   for (const p of s.planets) {
     if (p.moon) continue;
-    if (!p.buildQueue.length) list.push({ level: 'warning', text: `Aucune construction sur ${p.name}`, route: '#/' });
+    if (!p.buildQueue.length) list.push({ level: 'warning', text: `Aucune construction sur ${p.name}`, route: '#/', planet: p.id });
     for (const r of RESOURCES) {
       const t = fullAt(p, r);
       if (t == null || t - now > STORAGE_WARNING) continue;
       const text = t <= now ? `${resourceName(r)} : stockage plein sur ${p.name}` : `${resourceName(r)} : stockage plein dans ${duration(t - now)} sur ${p.name}`;
-      list.push({ level: 'warning', text, route: '#/resources' });
+      list.push({ level: 'warning', text, route: '#/resources', planet: p.id });
     }
   }
   if (!s.user.researchQueue.length && s.planets.some(p => (p.buildings.researchLab ?? 0) > 0)) {
-    list.push({ level: 'warning', text: 'Aucune recherche en cours', route: '#/research' });
+    list.push({ level: 'warning', text: 'Aucune recherche en cours', route: '#/research', planet: bestLab(s)?.id });
   }
   return list;
 }
@@ -162,6 +171,7 @@ export function diff(prev: GameState | null, next: GameState, memory: Memory): {
           title: `Construction terminée sur ${after.name}`,
           message: after.buildQueue.length ? names : `${names}\nFile de construction vide`,
           route: '#/',
+          planet: after.id,
         });
       }
 
@@ -173,6 +183,7 @@ export function diff(prev: GameState | null, next: GameState, memory: Memory): {
           title: `Chantier terminé sur ${after.name}`,
           message: before.shipQueue.map(lot => `${num(lot.count)} × ${label(lot.key)}`).join(', '),
           route: '#/shipyard',
+          planet: after.id,
         });
       }
     }
@@ -186,6 +197,7 @@ export function diff(prev: GameState | null, next: GameState, memory: Memory): {
         title: 'Recherche terminée',
         message: next.user.researchQueue.length ? names : `${names}\nAucune recherche en cours`,
         route: '#/research',
+        planet: bestLab(next)?.id,
       });
     }
 
@@ -201,6 +213,7 @@ export function diff(prev: GameState | null, next: GameState, memory: Memory): {
         title: `Flotte revenue sur ${home}`,
         message: [shipsText(f.ships), cargo && `Cargaison : ${cargo}`].filter(Boolean).join('\n') || (f.mission && missionName(f.mission)) || 'Flotte',
         route: '#/fleet',
+        planet: f.originId,
       });
     }
 
@@ -219,6 +232,7 @@ export function diff(prev: GameState | null, next: GameState, memory: Memory): {
       title: `${foreignLabel(f)} en approche`,
       message: `Cible : ${place(f.targetName, f.target)}\nImpact à ${clock(f.arriveAt)}, dans ${duration(f.arriveAt - now)}`,
       route: '#/fleet',
+      planet: ownAt(next, f.target)?.id,
     });
   }
 
@@ -240,6 +254,7 @@ export function diff(prev: GameState | null, next: GameState, memory: Memory): {
         title: level === 'full' ? `${resourceName(r)} : stockage plein sur ${p.name}` : `${resourceName(r)} : stockage bientôt plein sur ${p.name}`,
         message: level === 'full' ? 'La production s’arrête tant que le stockage est plein.' : `Plein à ${clock(t)}, dans ${duration(t - now)}`,
         route: '#/resources',
+        planet: p.id,
       });
     }
   }
