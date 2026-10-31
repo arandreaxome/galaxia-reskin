@@ -60,6 +60,8 @@ html.radar-skin {
   --mono: var(--skin-font);
 
   color-scheme: dark;
+  /* Cases à cocher, curseurs et boutons radio natifs */
+  accent-color: var(--c-field-light);
   scrollbar-color: var(--c-field) var(--c-black);
 }
 
@@ -1459,4 +1461,20 @@ html.radar-skin .chat-notice {
 
 html.radar-skin .chat-input textarea {
   font-family: var(--skin-typewriter);
+}
+
+/* --------------------------------------------------------------------------
+   Mon compte : catégorie « Attaques en approche » marquée comme les camps hostiles,
+   vignettes des jeux de visuels sur fond noir.
+   -------------------------------------------------------------------------- */
+
+html.radar-skin .notify-cats .notify-attack b {
+  color: var(--c-ivory) !important;
+  text-decoration: underline 2px var(--c-brick);
+  text-underline-offset: 3px;
+}
+
+html.radar-skin .pack-thumbs img {
+  background: var(--c-black) !important;
+  border-radius: 2px !important;
 }
