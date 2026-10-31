@@ -105,6 +105,16 @@ selectOrigin(true);
 window.addEventListener('popstate', () => selectOrigin(false));
 window.addEventListener('hashchange', () => selectOrigin(false));
 
+// Page affichée, pour les règles de skin.css propres à une page (html[data-radar-route]).
+function markRoute() {
+  document.documentElement.dataset.radarRoute = location.hash.slice(2).split(/[?/]/)[0] || 'planet';
+}
+
+// Le jeu change de page par history.pushState, sans hashchange : l'API Navigation voit chaque changement d'adresse.
+markRoute();
+(window as { navigation?: EventTarget }).navigation?.addEventListener('currententrychange', markRoute);
+window.addEventListener('hashchange', markRoute);
+
 window.addEventListener('message', event => {
   const msg = event.data as { source?: string; kind?: string; data?: unknown } | null;
   if (event.source !== window || msg?.source !== 'galaxia-radar' || msg.kind !== 'system') return;

@@ -21,6 +21,7 @@ export default defineConfig({
         sonar: 'src/sonar.ts',
         rename: 'src/rename.ts',
         topbar: 'src/topbar.ts',
+        grades: 'src/grades.ts',
       },
       output: {
         entryFileNames: '[name].js',

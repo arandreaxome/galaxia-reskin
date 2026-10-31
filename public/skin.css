@@ -1537,3 +1537,57 @@ html.radar-skin .toasts .toast.error {
   color: var(--c-black) !important;
   border: 3px double var(--c-red) !important;
 }
+
+/* --------------------------------------------------------------------------
+   Classement en tableau d'honneur : rangs au pochoir, joueur IA en gris. Onglet Joueurs : grade et insigne
+   de chaque joueur selon ses points (src/grades.ts : --radar-grade et --radar-insignia sur sa ligne).
+   -------------------------------------------------------------------------- */
+
+html.radar-skin[data-radar-route='ranking'] .table tbody td.num:first-child {
+  font: 800 18px / 1 var(--skin-stencil);
+  letter-spacing: 0.06em;
+}
+
+html.radar-skin[data-radar-route='ranking'] .table tbody tr[data-radar-grade] td.num:first-child {
+  width: 1%;
+  text-align: left;
+  white-space: nowrap;
+}
+
+html.radar-skin[data-radar-route='ranking'] .table tbody tr[data-radar-grade] td.num:first-child::before {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 20px;
+  margin-right: 10px;
+  vertical-align: -3px;
+  background: var(--radar-insignia) right center no-repeat;
+}
+
+/* Grade calé à droite de la cellule du joueur, hors du flux (jamais de retour à la ligne), dans une marge
+   à la mesure du plus long (« Général de corps d’armée », 24 caractères de 7,5 px). */
+html.radar-skin[data-radar-route='ranking'] .table tbody tr[data-radar-grade] td:nth-child(2) {
+  position: relative;
+  padding-right: 200px;
+}
+
+html.radar-skin[data-radar-route='ranking'] .table tbody tr[data-radar-grade] td:nth-child(2)::after {
+  content: var(--radar-grade);
+  position: absolute;
+  top: calc(50% + 1px);
+  right: 8px;
+  transform: translateY(-50%);
+  font: 700 11px / 1 var(--skin-typewriter);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-ivory-2);
+}
+
+html.radar-skin[data-radar-route='ranking'] .table:has(tr[data-radar-grade]) thead th:nth-child(2)::after {
+  content: 'Grade';
+  float: right;
+}
+
+html.radar-skin .ai-mark {
+  filter: grayscale(1) !important;
+}
