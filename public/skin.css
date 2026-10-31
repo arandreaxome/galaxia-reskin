@@ -1680,3 +1680,37 @@ html.radar-skin .combat-replay .cr-label {
   font-family: var(--skin-typewriter);
   fill: var(--c-ivory-2) !important;
 }
+
+/* --------------------------------------------------------------------------
+   Étiquettes de mission des mouvements en tampons au pochoir ; encre selon la mission :
+   brique (attaque), acier (espionnage), laiton (transport, stationnement, défense),
+   gris-vert (recyclage), ivoire (colonisation, expédition).
+   -------------------------------------------------------------------------- */
+
+html.radar-skin details.move .tag {
+  --stamp: var(--c-ivory-2);
+  padding: 2px 7px 1px;
+  color: var(--c-ivory) !important;
+  font: 800 12px / 1 var(--skin-stencil);
+  letter-spacing: 0.12em;
+  background: color-mix(in srgb, var(--stamp) 16%, transparent) !important;
+  border: 3px double var(--stamp);
+  border-radius: 1px !important;
+  transform: rotate(-2deg);
+}
+
+html.radar-skin details.move:is(.mission-attack, .mission-destroy, .mission-missile) .tag {
+  --stamp: var(--c-brick);
+}
+
+html.radar-skin details.move.mission-spy .tag {
+  --stamp: var(--c-steel);
+}
+
+html.radar-skin details.move:is(.mission-transport, .mission-deploy, .mission-defend) .tag {
+  --stamp: var(--c-brass);
+}
+
+html.radar-skin details.move.mission-recycle .tag {
+  --stamp: var(--c-field-light);
+}
