@@ -871,15 +871,15 @@ html.radar-skin .gsys-intel.empty {
   stroke: none;
 }
 
-html.radar-skin #gmap-core stop:nth-child(1) {
+html.radar-skin :is(#gmap-core, #umap-core) stop:nth-child(1) {
   stop-color: var(--c-ivory);
 }
 
-html.radar-skin #gmap-core stop:nth-child(2) {
+html.radar-skin :is(#gmap-core, #umap-core) stop:nth-child(2) {
   stop-color: var(--c-field-light);
 }
 
-html.radar-skin #gmap-core stop:nth-child(3) {
+html.radar-skin :is(#gmap-core, #umap-core) stop:nth-child(3) {
   stop-color: var(--c-field);
 }
 
