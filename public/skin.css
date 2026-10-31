@@ -1591,3 +1591,62 @@ html.radar-skin[data-radar-route='ranking'] .table:has(tr[data-radar-grade]) the
 html.radar-skin .ai-mark {
   filter: grayscale(1) !important;
 }
+
+/* --------------------------------------------------------------------------
+   Plans de bataille en ordres d'opération : feuille ivoire tapée à la machine,
+   bandeau et tampon OPÉRATION ; plans récents tapés comme un registre.
+   -------------------------------------------------------------------------- */
+
+html.radar-skin .panel .plan-card {
+  --text: var(--c-black);
+  --text-2: var(--c-anthracite);
+  --muted: rgb(26 26 26 / 68%);
+  --line: rgb(26 26 26 / 22%);
+  --accent: var(--c-black);
+  --accent-2: var(--c-black);
+  position: relative;
+  padding: 46px 14px 12px;
+  color: var(--c-black);
+  font-family: var(--skin-typewriter);
+  background: var(--c-ivory) !important;
+  border: 0 !important;
+  border-radius: 0;
+}
+
+html.radar-skin .panel .plan-card::before {
+  content: 'ORDRE D\2019 OP\C9 RATION';
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  left: 14px;
+  padding-bottom: 6px;
+  font: 400 13px / 1.2 var(--skin-telex);
+  letter-spacing: 0.3em;
+  border-bottom: 3px double var(--c-black);
+}
+
+html.radar-skin .panel .plan-card::after {
+  content: 'OP\C9 RATION';
+  position: absolute;
+  top: 4px;
+  right: 18px;
+  padding: 3px 8px 1px;
+  color: var(--c-red);
+  font: 800 16px / 1 var(--skin-stencil);
+  letter-spacing: 0.14em;
+  border: 3px double var(--c-red);
+  transform: rotate(-5deg);
+  opacity: 0.88;
+  pointer-events: none;
+  -webkit-mask: var(--stamp-grain) 0 0 / 140px 70px;
+  mask: var(--stamp-grain) 0 0 / 140px 70px;
+}
+
+html.radar-skin .panel .plan-card .btn.ghost:not(.danger) {
+  color: var(--c-black);
+  border-color: rgb(26 26 26 / 45%);
+}
+
+html.radar-skin .plan-history li {
+  font-family: var(--skin-typewriter);
+}
