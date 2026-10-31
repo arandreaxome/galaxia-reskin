@@ -1478,3 +1478,62 @@ html.radar-skin .pack-thumbs img {
   background: var(--c-black) !important;
   border-radius: 2px !important;
 }
+
+/* --------------------------------------------------------------------------
+   Alertes du jeu en télégrammes : bandeau d'attaque en approche sur feuille ivoire,
+   tampon URGENT ; messages éphémères en bandes de télex (erreurs filetées de rouge).
+   -------------------------------------------------------------------------- */
+
+html.radar-skin .threat-banner.hostile {
+  color: var(--c-black) !important;
+  font-family: var(--skin-typewriter);
+  background: var(--c-ivory) !important;
+  border: 3px double var(--c-red) !important;
+}
+
+html.radar-skin .threat-banner.hostile::before {
+  content: 'URGENT';
+  flex: none;
+  padding: 3px 8px 1px;
+  color: var(--c-red);
+  font: 800 17px / 1 var(--skin-stencil);
+  letter-spacing: 0.14em;
+  border: 3px double var(--c-red);
+  transform: rotate(-4deg);
+  -webkit-mask: var(--stamp-grain) 0 0 / 140px 70px;
+  mask: var(--stamp-grain) 0 0 / 140px 70px;
+}
+
+html.radar-skin .threat-banner.hostile svg {
+  color: var(--c-red);
+}
+
+html.radar-skin .threat-banner.hostile .threat-text b {
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+html.radar-skin .threat-banner.hostile .threat-time {
+  font-family: var(--skin-typewriter);
+  font-weight: 700;
+}
+
+html.radar-skin .threat-banner.hostile .threat-more {
+  color: var(--c-ivory) !important;
+  background: var(--c-red) !important;
+}
+
+html.radar-skin .toasts .toast {
+  color: var(--c-black) !important;
+  font-family: var(--skin-typewriter);
+  letter-spacing: 0.02em;
+  background: var(--c-ivory) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* La classe error du jeu passe aussi par la règle des états défavorables (texte ivoire) : encre forcée. */
+html.radar-skin .toasts .toast.error {
+  color: var(--c-black) !important;
+  border: 3px double var(--c-red) !important;
+}
