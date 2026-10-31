@@ -26,6 +26,8 @@ export type Planet = {
   buildings: Record<string, number>;
   buildQueue: QueueItem[];
   shipQueue: ShipLot[];
+  /** Vaisseaux à quai (hors flottes en vol). */
+  ships?: Record<string, number>;
 };
 
 export type Fleet = {

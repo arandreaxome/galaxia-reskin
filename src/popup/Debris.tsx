@@ -5,6 +5,7 @@ import { label, resourceName } from '../names';
 import { openGame } from '../open-game';
 import { nearest } from '../targets';
 import type { GameState } from '../types';
+import { bestOrigin, byDistance, OriginPicker } from './Origin';
 
 type Sort = 'amount' | 'proximity' | 'coords';
 const SORT_KEY = 'radar.debris.sort';
@@ -101,7 +102,14 @@ export function DebrisView({ state, store, now, page }: Props) {
       ) : (
         <ul className="target-list">
           {rows.map(row => (
-            <FieldRow key={row.f.key} row={row} now={now} open={open === row.f.key} onToggle={() => setOpen(open === row.f.key ? null : row.f.key)} />
+            <FieldRow
+              key={row.f.key}
+              row={row}
+              state={state}
+              now={now}
+              open={open === row.f.key}
+              onToggle={() => setOpen(open === row.f.key ? null : row.f.key)}
+            />
           ))}
         </ul>
       )}
@@ -113,14 +121,13 @@ export function DebrisView({ state, store, now, page }: Props) {
   );
 }
 
-function FieldRow({ row, now, open, onToggle }: { row: Row; now: number; open: boolean; onToggle: () => void }) {
+function FieldRow({ row, state, now, open, onToggle }: { row: Row; state: GameState; now: number; open: boolean; onToggle: () => void }) {
   const { f, total, recyclers, near, enRoute } = row;
   const name = label('recycler').toLowerCase();
   const parts = [`${num(recyclers)} ${name}${recyclers > 1 ? 's' : ''}`];
   parts.push(near ? (near.systems ? `${near.systems} syst.` : 'ton système') : 'autre galaxie');
   parts.push(f.estimated ? `estimé, dernier rapport il y a ${age(now - f.at)}` : `vu il y a ${age(now - f.at)}`);
   if (f.p === 16) parts.push('espace inconnu');
-  const fleet = `#/fleet?g=${f.g}&s=${f.s}&p=${f.p}&mission=recycle&ships=recycler:${recyclers}`;
 
   return (
     <li className="target">
@@ -138,20 +145,27 @@ function FieldRow({ row, now, open, onToggle }: { row: Row; now: number; open: b
       <button className="icon goto" title={`Ouvrir le secteur ${f.g}:${f.s} dans le jeu`} onClick={() => void openGame(`#/galaxy?g=${f.g}&s=${f.s}`)}>
         ↗
       </button>
-      {open && (
-        <div className="details">
-          <div className="actions">
-            <button onClick={() => void openGame(fleet)}>
-              Préparer le recyclage ({num(recyclers)} {name}
-              {recyclers > 1 ? 's' : ''})
-            </button>
-          </div>
-          <p className="muted hint">
-            {enRoute && 'Des recycleurs sont déjà en route vers ce champ. '}Ouvre la page Flotte du jeu préremplie, depuis la planète sélectionnée dans le jeu :
-            rien ne part sans ton clic.
-          </p>
-        </div>
-      )}
+      {open && <FieldDetails row={row} state={state} name={name} />}
     </li>
+  );
+}
+
+function FieldDetails({ row, state, name }: { row: Row; state: GameState; name: string }) {
+  const { f, recyclers, enRoute } = row;
+  const planets = byDistance(state, f);
+  const [origin, setOrigin] = useState(() => bestOrigin(planets, 'recycler', recyclers)?.id);
+  const fleet = `#/fleet?g=${f.g}&s=${f.s}&p=${f.p}&mission=recycle&ships=recycler:${recyclers}`;
+  const count = (n: number) => `${num(n)} ${name}${n > 1 ? 's' : ''}`;
+  return (
+    <div className="details">
+      <OriginPicker planets={planets} to={f} value={origin} onChange={setOrigin} detail={p => count(p.ships?.recycler ?? 0)} />
+      <div className="actions">
+        <button onClick={() => void openGame(fleet, origin)}>Préparer le recyclage ({count(recyclers)})</button>
+      </div>
+      <p className="muted hint">
+        {enRoute && 'Des recycleurs sont déjà en route vers ce champ. '}Ouvre la page Flotte du jeu préremplie, depuis la planète choisie, que l’extension
+        sélectionne dans le jeu : rien ne part sans ton clic.
+      </p>
+    </div>
   );
 }

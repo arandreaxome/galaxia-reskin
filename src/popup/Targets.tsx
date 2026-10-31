@@ -5,6 +5,7 @@ import { resourceName } from '../names';
 import { openGame } from '../open-game';
 import { cargoFor, lootOf, nearest, observedSystems, targetStatus, type TargetStatus, type TargetStore } from '../targets';
 import type { GameState, Planet, Scan, Target } from '../types';
+import { bestOrigin, byDistance, OriginPicker } from './Origin';
 
 type Sort = 'coords' | 'proximity' | 'loot' | 'protection';
 type Filters = { kind: 'pirates' | 'players'; galaxy: number; levels: number[]; status: TargetStatus | 'all'; sort: Sort };
@@ -283,13 +284,21 @@ function TargetRow({ row, now, open, onToggle, state }: { row: Row; now: number;
       >
         ↗
       </button>
-      {open && <Details t={t} probes={state.user.prefs?.probes ?? 2} />}
+      {open && <Details t={t} state={state} />}
     </li>
   );
 }
 
-function Details({ t, probes }: { t: Target; probes: number }) {
+function Details({ t, state }: { t: Target; state: GameState }) {
   const r = t.report;
+  const probes = state.user.prefs?.probes ?? 2;
+  const loot = lootOf(t);
+  const cargo = loot ? cargoFor(loot, state.user.research.hyperspaceTech) : 0;
+  // Origine proposée : de quoi emporter le butin pour une attaque, sinon des sondes.
+  const planets = byDistance(state, t);
+  const [origin, setOrigin] = useState(() =>
+    (t.pirate && cargo ? bestOrigin(planets, 'largeCargo', cargo) : bestOrigin(planets, 'espionageProbe', probes))?.id,
+  );
   const fleet = (mission: string, extra = '') => `#/fleet?g=${t.g}&s=${t.s}&p=${t.p}&mission=${mission}${extra}`;
   return (
     <div className="details">
@@ -307,14 +316,21 @@ function Details({ t, probes }: { t: Target; probes: number }) {
       ) : (
         <p className="muted">Pas encore de rapport d’espionnage.</p>
       )}
+      <OriginPicker
+        planets={planets}
+        to={t}
+        value={origin}
+        onChange={setOrigin}
+        detail={p => `${num(p.ships?.espionageProbe ?? 0)} sondes · ${num(p.ships?.largeCargo ?? 0)} GT`}
+      />
       <div className="actions">
-        <button onClick={() => void openGame(fleet('spy', `&ships=espionageProbe:${probes}`))}>
+        <button onClick={() => void openGame(fleet('spy', `&ships=espionageProbe:${probes}`), origin)}>
           Espionner ({probes} sonde{probes > 1 ? 's' : ''})
         </button>
-        {t.pirate && <button onClick={() => void openGame(fleet('attack'))}>Préparer l’attaque</button>}
+        {t.pirate && <button onClick={() => void openGame(fleet('attack'), origin)}>Préparer l’attaque</button>}
         {r && <button onClick={() => void openGame(`#/simulator?spy=${r.id}`)}>Simuler</button>}
       </div>
-      <p className="muted hint">Ouvre la page du jeu préremplie, depuis la planète sélectionnée dans le jeu : rien ne part sans ton clic.</p>
+      <p className="muted hint">Ouvre la page du jeu préremplie, depuis la planète choisie, que l’extension sélectionne dans le jeu : rien ne part sans ton clic.</p>
     </div>
   );
 }

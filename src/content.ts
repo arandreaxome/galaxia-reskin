@@ -77,6 +77,34 @@ try {
   // Extension rechargée : ce script n'a plus de contexte.
 }
 
+// Planète d'origine choisie dans la popup (paramètre radarPlanet de l'adresse). Le jeu retient la planète affichée
+// dans galaxia.planet et ne la relit qu'au démarrage : on l'écrit avant qu'il démarre ; jeu déjà chargé sur une
+// autre planète, on recharge (la page Flotte vide sa sélection quand la planète change après coup).
+const PLANET_KEY = 'galaxia.planet';
+const PLANET_PARAM = 'radarPlanet';
+
+function selectOrigin(starting: boolean) {
+  const [path, query = ''] = location.hash.split('?');
+  const params = new URLSearchParams(query);
+  const planet = params.get(PLANET_PARAM);
+  if (!planet) return;
+  params.delete(PLANET_PARAM);
+  history.replaceState(history.state, '', `${location.pathname}${location.search}${path}${params.size ? `?${params}` : ''}`);
+  let current: string | null = null;
+  try {
+    current = localStorage.getItem(PLANET_KEY);
+    localStorage.setItem(PLANET_KEY, planet);
+  } catch {
+    return;
+  }
+  if (!starting && current !== planet) location.reload();
+}
+
+// popstate arrive avant que le jeu ne lise puis n'efface les paramètres de la page ; hashchange en secours.
+selectOrigin(true);
+window.addEventListener('popstate', () => selectOrigin(false));
+window.addEventListener('hashchange', () => selectOrigin(false));
+
 window.addEventListener('message', event => {
   const msg = event.data as { source?: string; kind?: string; data?: unknown } | null;
   if (event.source !== window || msg?.source !== 'galaxia-radar' || msg.kind !== 'system') return;

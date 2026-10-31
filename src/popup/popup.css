@@ -742,3 +742,20 @@ input[type='checkbox']:focus-visible {
   outline: 1px solid var(--focus);
   outline-offset: 1px;
 }
+
+/* Planète d'origine des préparations de flotte (onglets Cibles et Débris). */
+.origins {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.origins-label {
+  margin-right: 4px;
+  color: var(--text-2);
+  font-size: var(--size-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

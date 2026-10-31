@@ -1,8 +1,11 @@
 const GAME = 'https://galaxia.eldau.xyz/';
 
-/** Affiche le jeu sur la page demandée, dans l'onglet déjà ouvert s'il y en a un. */
-export async function openGame(route = '#/') {
-  const url = GAME + route;
+/**
+ * Affiche le jeu sur la page demandée, dans l'onglet déjà ouvert s'il y en a un. `planet` : planète d'origine à
+ * sélectionner d'abord dans le jeu (paramètre radarPlanet, appliqué par content.js).
+ */
+export async function openGame(route = '#/', planet?: string) {
+  const url = GAME + (planet ? `${route}${route.includes('?') ? '&' : '?'}radarPlanet=${encodeURIComponent(planet)}` : route);
   const [tab] = await chrome.tabs.query({ url: `${GAME}*` });
   if (tab?.id == null) {
     await chrome.tabs.create({ url });
