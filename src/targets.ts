@@ -131,6 +131,14 @@ export function reconcile(store: TargetStore, known: Record<string, { pirates?: 
   return { list, gone };
 }
 
+/** Secteurs à repasser : ceux de la liste des cibles (vus ou espionnés) et ceux déjà vus dans le jeu, par galaxie puis système. */
+export function observedSystems(store: TargetStore | undefined, viewed: string[] = []): string[] {
+  const systems = new Set(viewed);
+  for (const t of Object.values(store?.list ?? {})) systems.add(`${t.g}:${t.s}`);
+  const parts = (system: string) => system.split(':').map(Number);
+  return [...systems].sort((a, b) => parts(a)[0] - parts(b)[0] || parts(a)[1] - parts(b)[1]);
+}
+
 export function targetStatus(t: Target, now: number): TargetStatus {
   if (t.protectedUntil != null && t.protectedUntil > now) return 'protected';
   const r = t.report;

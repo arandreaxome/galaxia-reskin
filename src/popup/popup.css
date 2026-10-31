@@ -511,6 +511,21 @@ select {
   border-bottom: 1px solid var(--line);
 }
 
+/* Repasse des secteurs : confirmation du coût, puis avancement. */
+.scan-panel {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 6px 8px;
+  font-size: var(--size-small);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+}
+
+.scan-panel p {
+  margin: 0;
+}
+
 .target-main {
   display: grid;
   grid-template-columns: auto auto minmax(0, 1fr) auto;

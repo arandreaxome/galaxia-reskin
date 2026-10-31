@@ -4,11 +4,19 @@ import { clock, coords, duration, num, place } from '../format';
 import { FLEET_STATES, label, missionName, resourceName, setThemedNames } from '../names';
 import { openGame } from '../open-game';
 import { targetStatus, type TargetStore } from '../targets';
-import type { Fleet, GameState, Planet, Settings, Snapshot, Status } from '../types';
+import type { Fleet, GameState, Planet, Scan, Settings, Snapshot, Status } from '../types';
 import { SettingsView } from './Settings';
 import { Targets } from './Targets';
 
-type Stored = { snapshot?: Snapshot; status?: Status; targets?: TargetStore; reportsAt?: number; settings?: Settings };
+type Stored = {
+  snapshot?: Snapshot;
+  status?: Status;
+  targets?: TargetStore;
+  reportsAt?: number;
+  settings?: Settings;
+  viewedSystems?: string[];
+  scan?: Scan;
+};
 type Tab = 'empire' | 'targets' | 'settings';
 
 const open = (route = '#/') => void openGame(route);
@@ -31,7 +39,7 @@ function useStored(): Stored {
   const [stored, setStored] = useState<Stored>({});
   useEffect(() => {
     const load = () =>
-      void (chrome.storage.local.get(['snapshot', 'status', 'targets', 'reportsAt', 'settings']) as Promise<Stored>).then(setStored);
+      void (chrome.storage.local.get(['snapshot', 'status', 'targets', 'reportsAt', 'settings', 'viewedSystems', 'scan']) as Promise<Stored>).then(setStored);
     load();
     chrome.storage.onChanged.addListener(load);
     // Relevé frais à l'ouverture de la popup.
@@ -59,7 +67,7 @@ const STATUS_TEXT: Record<Status, (fetchedAt: number) => string> = {
 };
 
 export function App() {
-  const { snapshot, status = 'ok', targets, reportsAt, settings } = useStored();
+  const { snapshot, status = 'ok', targets, reportsAt, settings, viewedSystems, scan } = useStored();
   setThemedNames(Boolean(settings?.rename));
   const now = useServerNow(snapshot?.offset ?? 0);
   const [tab, setTab] = useState(loadTab);
@@ -120,7 +128,7 @@ export function App() {
       {tab === 'settings' ? (
         <SettingsView settings={settings} />
       ) : tab === 'targets' ? (
-        <Targets state={state} store={targets} reportsAt={reportsAt} now={now} page={page} />
+        <Targets state={state} store={targets} reportsAt={reportsAt} viewedSystems={viewedSystems} scan={scan} now={now} page={page} />
       ) : (
         <>
           <section className="card">

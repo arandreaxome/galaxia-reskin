@@ -5,7 +5,7 @@ import { alerts, diff, initialMemory, messageEvents, nextDeadline, type GameEven
 import { setThemedNames } from './names';
 import { openGame } from './open-game';
 import { emptyStore, mergeCombats, mergeReports, mergeSystem, reconcile, type TargetStore } from './targets';
-import type { GalaxySystem, GameState, Message, Settings, Snapshot, Status } from './types';
+import type { GalaxySystem, GameState, Message, Scan, Settings, Snapshot, Status } from './types';
 
 const GAME = 'https://galaxia.eldau.xyz/';
 const API = `${GAME}api`;
@@ -21,6 +21,11 @@ type Stored = {
   targets?: TargetStore;
   reportsAt?: number;
   settings?: Settings;
+  /** Systèmes que la carte du jeu te dit avoir vus, ou où tu as une planète (« g:s »). */
+  viewedSystems?: string[];
+  /** Dernière lecture de la carte de la galaxie. */
+  mapAt?: number;
+  scan?: Scan;
 };
 
 const read = () => chrome.storage.local.get(null) as Promise<Stored>;
@@ -30,7 +35,8 @@ class SessionExpired extends Error {}
 async function api<T>(path: string, token: string): Promise<T> {
   const res = await fetch(API + path, { headers: { Authorization: `Bearer ${token}` } });
   if (res.status === 401) throw new SessionExpired();
-  if (!res.ok) throw new Error(`Erreur ${res.status}`);
+  // Le serveur explique ses refus (« pas assez de deutérium »…) dans le champ error.
+  if (!res.ok) throw new Error(((await res.json().catch(() => null)) as { error?: string } | null)?.error ?? `Erreur ${res.status}`);
   return (await res.json()) as T;
 }
 
@@ -165,16 +171,21 @@ const importMessages = (messages: Message[]) =>
 
 /** Rapports et carte de la galaxie (gratuits), relus à l'ouverture de l'onglet Cibles, au plus toutes les 2 min. */
 async function refreshReports(force = false) {
-  const { token, reportsAt = 0, snapshot } = await read();
-  if (!token || (!force && Date.now() - reportsAt < 2 * 60_000)) return;
+  // Limite propre à la carte : les messages, relus à chaque nouveau rapport, avancent reportsAt sans elle.
+  const { token, mapAt = 0, snapshot } = await read();
+  if (!token || (!force && Date.now() - mapAt < 2 * 60_000)) return;
   try {
     const [{ messages }, map] = await Promise.all([
       api<{ messages: Message[] }>('/messages', token),
-      api<{ known?: Record<string, { pirates?: number }> }>('/galaxy-map', token),
+      api<{ known?: Record<string, { pirates?: number; mine?: number; viewedAt?: number }> }>('/galaxy-map', token),
     ]);
     const now = Date.now() + (snapshot?.offset ?? 0);
     await updateTargets(store => reconcile(mergeCombats(mergeReports(store, messages), messages), map.known ?? {}, now), {
       reportsAt: Date.now(),
+      mapAt: Date.now(),
+      viewedSystems: Object.entries(map.known ?? {})
+        .filter(([, k]) => k.viewedAt || k.mine)
+        .map(([system]) => system),
     });
   } catch {
     // Nouvel essai à la prochaine ouverture.
@@ -192,6 +203,36 @@ async function onSystem(data: unknown) {
   await updateTargets(store => mergeSystem(store, data, Date.now() + (snapshot?.offset ?? 0)));
 }
 
+let scanning = false;
+
+/**
+ * Repasse demandée depuis l'onglet Cibles, après confirmation du coût : chaque secteur est rouvert comme dans
+ * le jeu (deutérium pris sur `planet`, gratuit là où tu as une planète), un par un. Un refus du serveur l'arrête.
+ */
+async function scanSystems(systems: string[], planet: string) {
+  const { token } = await read();
+  if (scanning || !token) return;
+  scanning = true;
+  const scan: Scan = { total: systems.length, done: 0, running: true, at: Date.now() };
+  try {
+    await chrome.storage.local.set({ scan });
+    for (const system of systems) {
+      const [g, s] = system.split(':');
+      const data = await api<unknown>(`/galaxy/${g}/${s}?planet=${encodeURIComponent(planet)}`, token);
+      await onSystem(data);
+      scan.done++;
+      await chrome.storage.local.set({ scan });
+      await new Promise(resolve => setTimeout(resolve, 300));
+    }
+  } catch (err) {
+    scan.error = err instanceof SessionExpired ? 'session expirée' : (err as Error).message;
+  } finally {
+    scanning = false;
+    await chrome.storage.local.set({ scan: { ...scan, running: false, at: Date.now() } });
+    void refresh(true);
+  }
+}
+
 async function onToken(token: string | null) {
   const { token: current } = await read();
   if (token !== current) await chrome.storage.local.set({ token, status: token ? 'ok' : 'no-token' });
@@ -199,11 +240,18 @@ async function onToken(token: string | null) {
   return updateBadge();
 }
 
-chrome.runtime.onMessage.addListener((msg: { type?: string; token?: string | null; data?: unknown }, sender) => {
+const isSystemList = (systems: unknown): systems is string[] =>
+  Array.isArray(systems) && systems.every(s => typeof s === 'string' && /^\d+:\d+$/.test(s));
+
+chrome.runtime.onMessage.addListener((msg: { type?: string; token?: string | null; data?: unknown; systems?: unknown; planet?: unknown }, sender) => {
   if (msg.type === 'token') void onToken(msg.token ?? null);
   if (msg.type === 'refresh') void refresh();
   if (msg.type === 'refresh-targets') void refreshReports();
   if (msg.type === 'system' && sender.url?.startsWith(GAME)) void onSystem(msg.data);
+  // Repasse : seulement depuis la popup de l'extension, jamais depuis une page.
+  if (msg.type === 'scan' && sender.url?.startsWith(chrome.runtime.getURL('')) && isSystemList(msg.systems) && typeof msg.planet === 'string') {
+    void scanSystems(msg.systems, msg.planet);
+  }
 });
 
 chrome.notifications.onClicked.addListener(id => {

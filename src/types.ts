@@ -65,6 +65,8 @@ export type GameState = {
   planets: Planet[];
   fleets: Fleet[];
   foreign?: Fleet[];
+  /** Réglages de l'univers ; galaxyViewCost : deutérium pour observer un système sans planète à toi. */
+  settings?: { galaxies?: number; systems?: number; galaxyViewCost?: number };
   unread: number;
   limits?: { fleetSlots: number; usedSlots: number; expeditionSlots: number; usedExpeditions: number };
   social?: Partial<Record<SocialCounter, number>>;
@@ -147,6 +149,9 @@ export type Target = {
 
 /** Réglages de l'extension (onglet Réglages), lus aussi par content.ts. Sans valeur, `assets` suit `skin`. */
 export type Settings = { skin?: boolean; assets?: boolean; rename?: boolean };
+
+/** Repasse des secteurs lancée depuis l'onglet Cibles : avancement, puis bilan. */
+export type Scan = { total: number; done: number; running: boolean; at: number; error?: string };
 
 /** État de la connexion au jeu, gardé dans chrome.storage.local avec le dernier relevé. */
 export type Status = 'ok' | 'no-token' | 'expired' | 'offline';
