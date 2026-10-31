@@ -276,6 +276,13 @@ function TargetRow({ row, now, open, onToggle, state }: { row: Row; now: number;
         <span className={`pill ${status}`}>{PILL[status]}</span>
         <span className="sub">{parts.join(' · ')}</span>
       </button>
+      <button
+        className="icon goto"
+        title={`Ouvrir le secteur ${t.g}:${t.s} dans le jeu (${viewCost(state)} deutérium, gratuit là où tu as une planète)`}
+        onClick={() => void openGame(`#/galaxy?g=${t.g}&s=${t.s}`)}
+      >
+        ↗
+      </button>
       {open && <Details t={t} probes={state.user.prefs?.probes ?? 2} />}
     </li>
   );

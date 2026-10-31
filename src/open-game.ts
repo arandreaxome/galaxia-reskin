@@ -8,6 +8,13 @@ export async function openGame(route = '#/') {
     await chrome.tabs.create({ url });
     return;
   }
-  await chrome.tabs.update(tab.id, tab.url === url ? { active: true } : { active: true, url });
+  // La page Galaxie ne lit le secteur de l'adresse qu'à son ouverture : déjà affichée, on la quitte d'abord.
+  if (route.startsWith('#/galaxy') && tab.url?.startsWith(`${GAME}#/galaxy`)) {
+    await chrome.tabs.update(tab.id, { active: true, url: `${GAME}#/` });
+    await new Promise(resolve => setTimeout(resolve, 300));
+    await chrome.tabs.update(tab.id, { url });
+  } else {
+    await chrome.tabs.update(tab.id, tab.url === url ? { active: true } : { active: true, url });
+  }
   await chrome.windows.update(tab.windowId, { focused: true });
 }

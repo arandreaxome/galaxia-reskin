@@ -507,8 +507,16 @@ select {
   border-bottom: 1px solid var(--line-strong);
 }
 
+/* Ligne de cible : la fiche (clic : détails) et, à droite, l'ouverture du secteur dans le jeu. */
 .target {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   border-bottom: 1px solid var(--line);
+}
+
+.target .details {
+  grid-column: 1 / -1;
 }
 
 /* Repasse des secteurs : confirmation du coût, puis avancement. */
