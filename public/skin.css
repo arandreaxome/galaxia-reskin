@@ -1650,3 +1650,33 @@ html.radar-skin .panel .plan-card .btn.ghost:not(.danger) {
 html.radar-skin .plan-history li {
   font-family: var(--skin-typewriter);
 }
+
+/* --------------------------------------------------------------------------
+   Rejeu du combat en table de wargame : tapis quadrillé, ligne de front en brique,
+   intitulés au pochoir, étiquettes des unités à la machine à écrire.
+   -------------------------------------------------------------------------- */
+
+html.radar-skin .combat-replay svg.cr-field {
+  background:
+    linear-gradient(rgb(92 107 92 / 28%) 1px, transparent 1px) 0 0 / 16px 16px,
+    linear-gradient(90deg, rgb(92 107 92 / 28%) 1px, transparent 1px) 0 0 / 16px 16px,
+    rgb(58 74 58 / 45%);
+}
+
+html.radar-skin .combat-replay .cr-mid {
+  stroke: var(--c-brick);
+  stroke-dasharray: 6 4;
+  stroke-width: 1.5px;
+}
+
+html.radar-skin .combat-replay :is(.cr-head, .cr-round) {
+  font-family: var(--skin-stencil);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+/* Étiquettes lisibles sur le tapis : le camp se lit déjà à la couleur des silhouettes. */
+html.radar-skin .combat-replay .cr-label {
+  font-family: var(--skin-typewriter);
+  fill: var(--c-ivory-2) !important;
+}
