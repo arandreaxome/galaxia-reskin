@@ -68,7 +68,7 @@ export type GameState = {
   fleets: Fleet[];
   foreign?: Fleet[];
   /** Réglages de l'univers ; galaxyViewCost : deutérium pour observer un système sans planète à toi. */
-  settings?: { galaxies?: number; systems?: number; galaxyViewCost?: number };
+  settings?: { galaxies?: number; systems?: number; galaxyViewCost?: number; fleetSpeed?: number };
   unread: number;
   limits?: { fleetSlots: number; usedSlots: number; expeditionSlots: number; usedExpeditions: number };
   social?: Partial<Record<SocialCounter, number>>;

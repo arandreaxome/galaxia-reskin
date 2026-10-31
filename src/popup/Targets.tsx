@@ -1,14 +1,15 @@
 import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { RESOURCES, shipsText } from '../analysis';
 import { age, clock, duration, num, short } from '../format';
+import { flight } from '../flight';
 import { resourceName } from '../names';
 import { openGame } from '../open-game';
 import { cargoFor, lootOf, nearest, observedSystems, targetStatus, type TargetStatus, type TargetStore } from '../targets';
-import type { GameState, Scan, Target } from '../types';
+import type { GameState, Planet, Scan, Target } from '../types';
 import { bestOrigin, byDistance, OriginPicker } from './Origin';
 import { ScanButton, ScanPanel, scanSummary, useScan, viewCost } from './Scan';
 
-type Sort = 'coords' | 'proximity' | 'loot' | 'protection';
+type Sort = 'coords' | 'proximity' | 'loot' | 'profit' | 'protection';
 type Filters = { kind: 'pirates' | 'players'; galaxy: number; levels: number[]; status: TargetStatus | 'all'; sort: Sort };
 
 const DEFAULT_FILTERS: Filters = { kind: 'pirates', galaxy: 0, levels: [], status: 'all', sort: 'coords' };
@@ -24,7 +25,16 @@ const STATUSES: [TargetStatus, string][] = [
 ];
 const PILL: Record<TargetStatus, string> = { ready: 'Prêt', protected: 'Protégé', respy: 'À réespionner', unprobed: 'À sonder' };
 
-type Row = { key: string; t: Target; status: TargetStatus; loot: number | null; near: ReturnType<typeof nearest> };
+/** `trip` : aller des grands transporteurs du butin depuis l'origine proposée ; `profit` : butin par minute de vol. */
+type Row = {
+  key: string;
+  t: Target;
+  status: TargetStatus;
+  loot: number | null;
+  near: ReturnType<typeof nearest>;
+  trip: ReturnType<typeof flight>;
+  profit: number | null;
+};
 
 const byCoords = (a: Row, b: Row) => a.t.g - b.t.g || a.t.s - b.t.s || a.t.p - b.t.p;
 const availableAt = (r: Row) => (r.status === 'protected' ? (r.t.protectedUntil ?? 0) : 0);
@@ -32,6 +42,7 @@ const SORTS: Record<Sort, (a: Row, b: Row) => number> = {
   coords: byCoords,
   proximity: (a, b) => (a.near?.systems ?? 999) - (b.near?.systems ?? 999) || byCoords(a, b),
   loot: (a, b) => (b.loot ?? -1) - (a.loot ?? -1) || byCoords(a, b),
+  profit: (a, b) => (b.profit ?? -1) - (a.profit ?? -1) || byCoords(a, b),
   protection: (a, b) => availableAt(a) - availableAt(b) || byCoords(a, b),
 };
 
@@ -76,7 +87,13 @@ export function Targets({ state, store, reportsAt, viewedSystems, scan, now, pag
   const galaxies = [...new Set(list.map(([, t]) => t.g))].sort((a, b) => a - b);
   const rows: Row[] = list
     .filter(([, t]) => t.pirate === (filters.kind === 'pirates') && (!filters.galaxy || t.g === filters.galaxy))
-    .map(([key, t]) => ({ key, t, status: targetStatus(t, now), loot: lootOf(t), near: nearest(t, state.planets) }));
+    .map(([key, t]) => {
+      const loot = lootOf(t);
+      const cargo = loot ? cargoFor(loot, state.user.research.hyperspaceTech) : 0;
+      const origin = cargo ? bestOrigin(byDistance(state, t), 'largeCargo', cargo) : undefined;
+      const trip = origin ? flight({ largeCargo: cargo }, origin, t, state.user.research, state.settings?.fleetSpeed) : null;
+      return { key, t, status: targetStatus(t, now), loot, near: nearest(t, state.planets), trip, profit: trip && loot ? loot / (trip.ms / 60_000) : null };
+    });
 
   // Le compteur de chaque filtre tient compte de l'autre.
   const levelOf = (r: Row) => r.t.level ?? UNKNOWN;
@@ -116,6 +133,7 @@ export function Targets({ state, store, reportsAt, viewedSystems, scan, now, pag
             <option value="coords">Position</option>
             <option value="proximity">Proximité</option>
             <option value="loot">Butin</option>
+            <option value="profit">Rentabilité</option>
             <option value="protection">Fin de protection</option>
           </select>
           <ScanButton control={scanControl} scan={scan} title="Rouvrir tous les secteurs déjà observés pour mettre les cibles à jour" />
@@ -202,7 +220,7 @@ function SystemHead({ system, state, seenAt, now }: { system: string; state: Gam
 }
 
 function TargetRow({ row, now, open, onToggle, state }: { row: Row; now: number; open: boolean; onToggle: () => void; state: GameState }) {
-  const { t, status, loot, near } = row;
+  const { t, status, loot, near, trip } = row;
   const r = t.report;
   const parts: string[] = [];
   if (status === 'protected' && t.protectedUntil) {
@@ -211,7 +229,8 @@ function TargetRow({ row, now, open, onToggle, state }: { row: Row; now: number;
   if (loot) parts.push(`butin ${short(loot)} · ${cargoFor(loot, state.user.research.hyperspaceTech)} GT`);
   if (r) parts.push(`flotte ${r.ships ? num(total(r.ships)) : '?'} · déf. ${r.defense ? num(total(r.defense)) : '?'}`);
   parts.push(r ? `rapport il y a ${age(now - r.at)}` : 'aucun rapport');
-  if (near) parts.push(near.systems ? `${near.systems} syst.` : 'ton système');
+  if (trip) parts.push(`≈ ${duration(trip.ms)} de vol`);
+  else if (near) parts.push(near.systems ? `${near.systems} syst.` : 'ton système');
 
   return (
     <li className={`target ${status}`}>
@@ -251,6 +270,9 @@ function Details({ t, state }: { t: Target; state: GameState }) {
     (t.pirate && cargo ? bestOrigin(planets, 'largeCargo', cargo) : bestOrigin(planets, 'espionageProbe', probes))?.id,
   );
   const fleet = (mission: string, extra = '') => `#/fleet?g=${t.g}&s=${t.s}&p=${t.p}&mission=${mission}${extra}`;
+  // Vol affiché pour chaque origine : celui de l'attaque (grands transporteurs du butin), sinon des sondes.
+  const ships: Record<string, number> = t.pirate && cargo ? { largeCargo: cargo } : { espionageProbe: probes };
+  const trip = (p: Planet) => flight(ships, p, t, state.user.research, state.settings?.fleetSpeed);
   return (
     <div className="details">
       {r ? (
@@ -272,7 +294,10 @@ function Details({ t, state }: { t: Target; state: GameState }) {
         to={t}
         value={origin}
         onChange={setOrigin}
-        detail={p => `${num(p.ships?.espionageProbe ?? 0)} sondes · ${num(p.ships?.largeCargo ?? 0)} GT`}
+        detail={p => {
+          const f = trip(p);
+          return `${f ? `≈ ${duration(f.ms)} · ${num(f.fuel)} deut · ` : ''}${num(p.ships?.espionageProbe ?? 0)} sondes · ${num(p.ships?.largeCargo ?? 0)} GT`;
+        }}
       />
       <div className="actions">
         <button onClick={() => void openGame(fleet('spy', `&ships=espionageProbe:${probes}`), origin)}>
