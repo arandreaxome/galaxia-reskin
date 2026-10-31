@@ -1,11 +1,12 @@
 import { Fragment, useEffect, useState, type ReactNode } from 'react';
-import { RESOURCES, resourcesAt, shipsText } from '../analysis';
+import { RESOURCES, shipsText } from '../analysis';
 import { age, clock, duration, num, short } from '../format';
 import { resourceName } from '../names';
 import { openGame } from '../open-game';
 import { cargoFor, lootOf, nearest, observedSystems, targetStatus, type TargetStatus, type TargetStore } from '../targets';
-import type { GameState, Planet, Scan, Target } from '../types';
+import type { GameState, Scan, Target } from '../types';
 import { bestOrigin, byDistance, OriginPicker } from './Origin';
+import { ScanButton, ScanPanel, scanSummary, useScan, viewCost } from './Scan';
 
 type Sort = 'coords' | 'proximity' | 'loot' | 'protection';
 type Filters = { kind: 'pirates' | 'players'; galaxy: number; levels: number[]; status: TargetStatus | 'all'; sort: Sort };
@@ -50,23 +51,11 @@ function countBy<K>(rows: Row[], key: (r: Row) => K) {
 
 const total = (units: Record<string, number>) => Object.values(units).reduce((sum, n) => sum + n, 0);
 
-/** Prix d'observation d'un système sans planète à toi, si le jeu ne le donne pas. */
-const GALAXY_VIEW_COST = 10;
-const viewCost = (state: GameState) => state.settings?.galaxyViewCost ?? GALAXY_VIEW_COST;
-
-/** Planète qui paie la repasse : celle qui a le plus de deutérium. */
-function richest(planets: Planet[], now: number): Planet | undefined {
-  return planets
-    .filter(p => !p.moon)
-    .reduce<Planet | undefined>((best, p) => (!best || resourcesAt(p, now).deuterium > resourcesAt(best, now).deuterium ? p : best), undefined);
-}
-
 type Props = { state: GameState; store?: TargetStore; reportsAt?: number; viewedSystems?: string[]; scan?: Scan; now: number; page: boolean };
 
 export function Targets({ state, store, reportsAt, viewedSystems, scan, now, page }: Props) {
   const [filters, setFilters] = useState(loadFilters);
   const [open, setOpen] = useState<string | null>(null);
-  const [confirming, setConfirming] = useState(false);
 
   // Rapports relus à l'ouverture (le service worker limite à une fois toutes les 2 min).
   useEffect(() => {
@@ -102,15 +91,9 @@ export function Targets({ state, store, reportsAt, viewedSystems, scan, now, pag
   const seen = new Map<string, number>();
   for (const [, t] of list) if (t.seenAt) seen.set(`${t.g}:${t.s}`, Math.max(seen.get(`${t.g}:${t.s}`) ?? 0, t.seenAt));
 
-  // Repasse : tous les secteurs déjà observés, au prix du jeu, payés par la planète la plus riche en deutérium.
-  const systems = observedSystems(store, viewedSystems);
-  const own = new Set(state.planets.map(p => `${p.g}:${p.s}`));
-  const cost = systems.filter(system => !own.has(system)).length * viewCost(state);
-  const payer = richest(state.planets, now);
-  const startScan = () => {
-    setConfirming(false);
-    if (payer) chrome.runtime.sendMessage({ type: 'scan', systems, planet: payer.id }).catch(() => {});
-  };
+  // Repasse : tous les secteurs déjà observés ou espionnés.
+  const scanControl = useScan(state, observedSystems(store, viewedSystems), now);
+  const plural = scanControl.systems.length > 1 ? 's' : '';
 
   const toggleLevel = (level: number) =>
     update({ levels: filters.levels.includes(level) ? filters.levels.filter(l => l !== level) : [...filters.levels, level] });
@@ -135,9 +118,7 @@ export function Targets({ state, store, reportsAt, viewedSystems, scan, now, pag
             <option value="loot">Butin</option>
             <option value="protection">Fin de protection</option>
           </select>
-          <button disabled={scan?.running || !systems.length} title="Rouvrir tous les secteurs déjà observés pour mettre les cibles à jour" onClick={() => setConfirming(!confirming)}>
-            ↻ Repasser
-          </button>
+          <ScanButton control={scanControl} scan={scan} title="Rouvrir tous les secteurs déjà observés pour mettre les cibles à jour" />
           {!page && (
             <button className="icon" title="Ouvrir dans un onglet" onClick={() => void chrome.tabs.create({ url: chrome.runtime.getURL('popup.html?page') })}>
               ⤢
@@ -158,30 +139,7 @@ export function Targets({ state, store, reportsAt, viewedSystems, scan, now, pag
             )}
           </div>
         )}
-        {confirming && (
-          <div className="scan-panel">
-            <p>
-              Repasser {systems.length} secteur{systems.length > 1 ? 's' : ''} déjà observé{systems.length > 1 ? 's' : ''} ou espionné{systems.length > 1 ? 's' : ''} : <b>{num(cost)} deutérium</b>
-              {payer && <>, pris sur {payer.name}</>} (gratuit là où tu as une planète).
-            </p>
-            {payer && resourcesAt(payer, now).deuterium < cost && (
-              <p className="warn">{payer.name} n’a que {num(resourcesAt(payer, now).deuterium)} deutérium : la repasse s’arrêtera en route.</p>
-            )}
-            <div className="actions">
-              <button onClick={startScan} disabled={!payer}>
-                Lancer la repasse
-              </button>
-              <button className="link" onClick={() => setConfirming(false)}>
-                Annuler
-              </button>
-            </div>
-          </div>
-        )}
-        {scan?.running && (
-          <p className="scan-panel">
-            Repasse en cours : {scan.done} / {scan.total} secteurs…
-          </p>
-        )}
+        <ScanPanel control={scanControl} scan={scan} now={now} what={`déjà observé${plural} ou espionné${plural}`} />
         <div className="row" role="group" aria-label="État">
           <Chip active={filters.status === 'all'} count={rows.filter(levelOk).length} onClick={() => update({ status: 'all' })}>
             Tous
@@ -224,14 +182,7 @@ export function Targets({ state, store, reportsAt, viewedSystems, scan, now, pag
       <p className="sources muted">
         Rapports d’espionnage relus {reportsAt ? `il y a ${age(Date.now() - reportsAt)}` : 'bientôt'}. Systèmes enregistrés quand tu les affiches dans
         le jeu ou par une repasse : l’extension ne rouvre la galaxie que sur ta demande, au prix du jeu.
-        {scan && !scan.running && (
-          <>
-            {' '}
-            {scan.error
-              ? `Dernière repasse arrêtée à ${scan.done} / ${scan.total} : ${scan.error}.`
-              : `Dernière repasse : ${scan.total} secteur${scan.total > 1 ? 's' : ''}, il y a ${age(Date.now() - scan.at)}.`}
-          </>
-        )}
+        {scanSummary(scan)}
       </p>
     </section>
   );
