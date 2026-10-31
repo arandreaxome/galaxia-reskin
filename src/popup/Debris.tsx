@@ -4,8 +4,9 @@ import { age, num, short } from '../format';
 import { label, resourceName } from '../names';
 import { openGame } from '../open-game';
 import { nearest } from '../targets';
-import type { GameState } from '../types';
+import type { GameState, Scan } from '../types';
 import { bestOrigin, byDistance, OriginPicker } from './Origin';
+import { ScanButton, ScanPanel, scanSummary, useScan } from './Scan';
 
 type Sort = 'amount' | 'proximity' | 'coords';
 const SORT_KEY = 'radar.debris.sort';
@@ -28,10 +29,10 @@ function loadSort(): Sort {
   }
 }
 
-type Props = { state: GameState; store?: DebrisStore; now: number; page: boolean };
+type Props = { state: GameState; store?: DebrisStore; scan?: Scan; now: number; page: boolean };
 
 /** Champs de débris connus, à recycler : vus dans les secteurs, ou estimés d'après tes combats et recyclages. */
-export function DebrisView({ state, store, now, page }: Props) {
+export function DebrisView({ state, store, scan, now, page }: Props) {
   const [galaxy, setGalaxy] = useState(0);
   const [sort, setSort] = useState(loadSort);
   const [open, setOpen] = useState<string | null>(null);
@@ -58,6 +59,13 @@ export function DebrisView({ state, store, now, page }: Props) {
     .filter(f => !galaxy || f.g === galaxy)
     .map(f => ({ f, total: f.metal + f.crystal, recyclers: recyclersFor(f, tech), near: nearest(f, state.planets), enRoute: enRoute.has(f.key) }))
     .sort(SORTS[sort]);
+  // Repasse : les secteurs dont un champ n'est qu'estimé, pour le confirmer ou l'effacer d'une vue réelle.
+  const estimated = [...new Set(fields.filter(f => f.estimated).map(f => `${f.g}:${f.s}`))].sort((a, b) => {
+    const [ga, sa] = a.split(':').map(Number);
+    const [gb, sb] = b.split(':').map(Number);
+    return ga - gb || sa - sb;
+  });
+  const scanControl = useScan(state, estimated, now);
   const total = rows.reduce((sum, r) => sum + r.total, 0);
   const recyclers = rows.reduce((sum, r) => sum + r.recyclers, 0);
 
@@ -80,12 +88,14 @@ export function DebrisView({ state, store, now, page }: Props) {
             <option value="proximity">Proximité</option>
             <option value="coords">Position</option>
           </select>
+          <ScanButton control={scanControl} scan={scan} title="Rouvrir les secteurs dont les champs sont estimés, pour les confirmer ou les effacer" />
           {!page && (
             <button className="icon" title="Ouvrir dans un onglet" onClick={() => void chrome.tabs.create({ url: chrome.runtime.getURL('popup.html?page') })}>
               ⤢
             </button>
           )}
         </div>
+        <ScanPanel control={scanControl} scan={scan} now={now} what="aux champs estimés" />
         {rows.length > 0 && (
           <p className="muted debris-total">
             {rows.length} champ{rows.length > 1 ? 's' : ''} · {short(total)} à récupérer · {num(recyclers)} {label('recycler').toLowerCase()}
@@ -116,6 +126,7 @@ export function DebrisView({ state, store, now, page }: Props) {
 
       <p className="sources muted">
         Champs vus dans les secteurs que tu affiches (ou repasses), puis estimés d’après tes combats (débris créés) et tes recyclages (débris récupérés).
+        {scanSummary(scan)}
       </p>
     </section>
   );

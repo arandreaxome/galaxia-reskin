@@ -134,7 +134,7 @@ export function App() {
       {tab === 'settings' ? (
         <SettingsView settings={settings} />
       ) : tab === 'debris' ? (
-        <DebrisView state={state} store={debris} now={now} page={page} />
+        <DebrisView state={state} store={debris} scan={scan} now={now} page={page} />
       ) : tab === 'targets' ? (
         <Targets state={state} store={targets} reportsAt={reportsAt} viewedSystems={viewedSystems} scan={scan} now={now} page={page} />
       ) : (
