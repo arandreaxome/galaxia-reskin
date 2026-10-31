@@ -1232,6 +1232,14 @@ html.radar-skin .msg-view.panel :is(.exp-pirates h4, .exp-aliens h4, .exp-lost h
   color: var(--c-red) !important;
 }
 
+/* Avis (repaire protégé…) : le cadre anthracite du thème sombre noierait l'encre ; sur la feuille, voile rouge
+   léger et filet rouge, texte à l'encre. */
+html.radar-skin .msg-view.panel .notice {
+  color: var(--c-black) !important;
+  background: rgb(107 30 30 / 8%) !important;
+  border-color: var(--c-red) !important;
+}
+
 /* Tableaux plus serrés : la machine à écrire est large, les colonnes de pertes doivent tenir. */
 html.radar-skin .msg-view.panel .table {
   font-size: 13px;
