@@ -1,6 +1,6 @@
 // Génère le pack à partir du catalogue (pack.ts) :
-//  - assets/skin/<clé>.svg et png/<clé>.png : les dessins, et leur rendu en référence pour un générateur d'images ;
-//  - assets/skin/prompts.md et prompts.csv : les prompts à envoyer à ce générateur ;
+//  - assets/skin/<clé>.svg et png/<clé>.png : les dessins, et leur rendu PNG ;
+//  - assets/skin/prompts.md et prompts.csv : les prompts des images réalistes, pour Gemini (un Gem porte le style) ;
 //  - public/skin-assets.css : les règles qui remplacent les images du jeu quand le réglage « pack d'assets »
 //    est actif (classe html.radar-assets, posée par content.js).
 // Une image déposée dans assets/skin/generated/<clé>.(png|webp|jpg) remplace le dessin de cette clé.
@@ -8,7 +8,7 @@
 
 import { copyFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { Resvg } from '@resvg/resvg-js';
-import { ASSETS, NAV, NEGATIVE, STYLE_ILLUSTRATION, STYLE_VECTOR, VIEWS, type Asset } from './pack.ts';
+import { ASSETS, GEM, NAV, VIEWS, type Asset } from './pack.ts';
 
 const root = new URL('../../', import.meta.url);
 const skin = new URL('assets/skin/', root);
@@ -58,47 +58,34 @@ const nav = NAV.map(({ route, svg }) => {
 const header = '/* Généré par tools/assets/build.ts (npm run assets) : ne pas modifier à la main. */\n\n';
 writeFileSync(new URL('public/skin-assets.css', root), header + [...images, ...nav].join('\n\n') + '\n');
 
-// Prompts pour un générateur d'images
-const prompt = (asset: Asset, style: string) => `${style} Subject: ${asset.brief}. Framing: ${VIEWS[asset.group]}.`;
+// Prompts pour Gemini : le Gem porte le style, chaque prompt ne donne que le sujet et le cadrage.
+const prompt = (asset: Asset) => `${asset.name} (${asset.key}). Subject: ${asset.brief}. Framing: ${VIEWS[asset.group]}.`;
 const groups = [...new Set(ASSETS.map(a => a.group))];
 const promptsMd = [
   '# Pack d’assets Galaxia Radar : prompts de génération',
   '',
   'Fichier généré par `npm run assets` à partir de `tools/assets/pack.ts` : modifier le catalogue, pas ce fichier.',
   '',
+  `Images réalistes façon photo d’archives de la Seconde Guerre mondiale, aux noms du renommage : un Gem Gemini porte le style, puis un prompt par image (${ASSETS.length} images). Les icônes du menu restent dessinées : elles servent de masque.`,
+  '',
   '## Mode d’emploi',
   '',
-  '1. Choisir un style pour tout le pack : A (pictogramme vectoriel, dans la continuité de l’extension) ou B (illustration).',
-  '2. Pour chaque élément, coller le prompt et joindre son rendu de référence `png/<clé>.png` (même silhouette, même cadrage).',
-  '3. Ajouter le prompt négatif quand l’outil le permet, sinon l’écrire en fin de prompt après « Avoid: ».',
-  '4. Exporter en PNG carré (1024 × 1024 conseillé), fond transparent.',
-  '5. Déposer chaque image dans `assets/skin/generated/<clé>.png`, puis lancer `npm run assets && npm run build` et recharger l’extension. Les clés sans image gardent leur dessin.',
+  '1. Dans Gemini, créer un Gem (Explorer les Gems › Nouveau Gem), par exemple « Galaxia Radar · Arsenal 1940 », et coller les instructions ci-dessous.',
+  '2. Dans une conversation avec ce Gem, envoyer un prompt par message : une image par élément. Une conversation par famille garde la série homogène ; une image qui s’écarte du style se régénère.',
+  '3. Enregistrer chaque image sous `assets/skin/generated/<clé>.png` (clé entre parenthèses au début du prompt ; `.jpg` et `.webp` sont acceptés).',
+  '4. Lancer `npm run assets && npm run build`, puis recharger l’extension (↻ dans `chrome://extensions`) et l’onglet du jeu. Les clés sans image gardent leur dessin.',
   '',
-  '## Style A : pictogramme vectoriel (conseillé)',
-  '',
-  '```text',
-  STYLE_VECTOR,
-  '```',
-  '',
-  '## Style B : illustration',
+  '## Instructions du Gem',
   '',
   '```text',
-  STYLE_ILLUSTRATION,
+  GEM,
   '```',
   '',
-  '## Prompt négatif',
-  '',
-  '```text',
-  NEGATIVE,
-  '```',
-  '',
-  '## Prompts par élément (style A)',
-  '',
-  'Pour le style B, remplacer la première partie (jusqu’à « same scale… ») par le paragraphe du style B, ou prendre la colonne `prompt_illustration` de `prompts.csv`.',
+  '## Prompts par image',
   ...groups.flatMap(group => [
     '',
     `### ${group}`,
-    ...ASSETS.filter(a => a.group === group).flatMap(a => ['', `**${a.key}** · ${a.name} · référence \`png/${a.key}.png\``, '', '```text', prompt(a, STYLE_VECTOR), '```']),
+    ...ASSETS.filter(a => a.group === group).flatMap(a => ['', `**${a.name}** · \`${a.key}\``, '', '```text', prompt(a), '```']),
   ]),
   '',
 ].join('\n');
@@ -106,8 +93,8 @@ writeFileSync(new URL('prompts.md', skin), promptsMd);
 
 const csvCell = (value: string) => `"${value.replace(/"/g, '""')}"`;
 const csv = [
-  ['key', 'name', 'group', 'reference', 'prompt_vector', 'prompt_illustration', 'negative'].join(','),
-  ...ASSETS.map(a => [a.key, a.name, a.group, `png/${a.key}.png`, prompt(a, STYLE_VECTOR), prompt(a, STYLE_ILLUSTRATION), NEGATIVE].map(csvCell).join(',')),
+  ['key', 'name', 'group', 'file', 'prompt'].join(','),
+  ...ASSETS.map(a => [a.key, a.name, a.group, `generated/${a.key}.png`, prompt(a)].map(csvCell).join(',')),
 ].join('\n');
 writeFileSync(new URL('prompts.csv', skin), csv + '\n');
 

@@ -2,408 +2,420 @@
 
 Fichier généré par `npm run assets` à partir de `tools/assets/pack.ts` : modifier le catalogue, pas ce fichier.
 
+Images réalistes façon photo d’archives de la Seconde Guerre mondiale, aux noms du renommage : un Gem Gemini porte le style, puis un prompt par image (61 images). Les icônes du menu restent dessinées : elles servent de masque.
+
 ## Mode d’emploi
 
-1. Choisir un style pour tout le pack : A (pictogramme vectoriel, dans la continuité de l’extension) ou B (illustration).
-2. Pour chaque élément, coller le prompt et joindre son rendu de référence `png/<clé>.png` (même silhouette, même cadrage).
-3. Ajouter le prompt négatif quand l’outil le permet, sinon l’écrire en fin de prompt après « Avoid: ».
-4. Exporter en PNG carré (1024 × 1024 conseillé), fond transparent.
-5. Déposer chaque image dans `assets/skin/generated/<clé>.png`, puis lancer `npm run assets && npm run build` et recharger l’extension. Les clés sans image gardent leur dessin.
+1. Dans Gemini, créer un Gem (Explorer les Gems › Nouveau Gem), par exemple « Galaxia Radar · Arsenal 1940 », et coller les instructions ci-dessous.
+2. Dans une conversation avec ce Gem, envoyer un prompt par message : une image par élément. Une conversation par famille garde la série homogène ; une image qui s’écarte du style se régénère.
+3. Enregistrer chaque image sous `assets/skin/generated/<clé>.png` (clé entre parenthèses au début du prompt ; `.jpg` et `.webp` sont acceptés).
+4. Lancer `npm run assets && npm run build`, puis recharger l’extension (↻ dans `chrome://extensions`) et l’onglet du jeu. Les clés sans image gardent leur dessin.
 
-## Style A : pictogramme vectoriel (conseillé)
-
-```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set.
-```
-
-## Style B : illustration
+## Instructions du Gem
 
 ```text
-Detailed matte illustration in the style of a 1940s technical field manual painted in gouache. Muted desaturated palette built on grey-green #4A5D4A, dark olive #3A4A3A, anthracite #2C2C2C and ivory #E8E4D9, dark red #6B1E1E only as a tiny accent. Clean silhouette readable at 64 pixels, soft directional light, transparent or plain #1A1A1A background, square 1:1, consistent rendering across the whole set.
+You are the image studio of "Galaxia Radar", a World War II makeover of a space strategy game. Each message I send names one game element (French name, then its key in brackets) and describes its subject and framing. Answer every message with exactly one new image that follows this style guide, so that the whole set looks like one coherent series. Do not add any text to your answer.
+
+LOOK
+- A genuine 1940s photograph, as taken by a war-department photographer, then hand-tinted: photorealistic and highly detailed, with authentic period materials and wear (chipped paint, mud, rust, canvas, rivets, oil stains, worn leather, brass).
+- Muted hand-tinted colours only: olive drab, field grey-green, khaki, gunmetal, weathered steel and aged ivory highlights. A small touch of dark oxblood red is allowed only on danger details (warhead band, fuse, flame). No bright or saturated colour.
+- Fine silver-gelatin film grain, slightly soft corners.
+
+LIGHT
+- Low-key studio light: one warm key light from the upper left, a faint cool rim light on the right edge that separates the subject from the background, deep but readable shadows.
+
+COMPOSITION
+- One single subject, centred, entirely in frame, filling about 70% of the image.
+- The subject rests on a small round patch of ground (earth, gravel, concrete or a wooden workbench, whatever suits it) that fades into a plain near-black background (#1A1A1A) with a soft vignette. No landscape, horizon, sky or extra objects unless the prompt asks for them.
+- Camera slightly above the subject, three-quarter view, unless the prompt says otherwise.
+- Square 1:1 format.
+- The image must stay readable when displayed very small (64 pixels): strong, clear silhouette, well separated from the background.
+
+EQUIPMENT
+- Generic designs that mix features of several nations’ equipment, never an exact copy of one identifiable model.
+- Soldiers are anonymous: helmets, shadow or distance hide their faces.
+
+NEVER INCLUDE
+- Text, letters, numbers, labels, logos, watermarks, signatures, frames or borders.
+- Flags, national markings, roundels, stars, crosses, eagles, swastikas or any other political or extremist symbol, unit badges or insignia.
+- Recognisable faces, gore, modern or science-fiction elements.
+- Cartoon, vector, flat-colour or video-game 3D-render looks.
 ```
 
-## Prompt négatif
-
-```text
-text, letters, numbers, logos, watermark, insignia, emblems, flags, national markings, roundels, stars, crosses, eagles, swastika or any political or extremist symbol, unit badges, brand names, detailed faces, gore, bright saturated colors, gradients, glow, busy background
-```
-
-## Prompts par élément (style A)
-
-Pour le style B, remplacer la première partie (jusqu’à « same scale… ») par le paragraphe du style B, ou prendre la colonne `prompt_illustration` de `prompts.csv`.
+## Prompts par image
 
 ### Unités
 
-**lightFighter** · Fantassin · référence `png/lightFighter.png`
+**Fantassin** · `lightFighter`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: an infantry rifleman standing in profile, round steel helmet, field jacket, small backpack, rifle held across the chest with fixed bayonet. Framing: side view facing right, full subject visible.
+Fantassin (lightFighter). Subject: an infantry rifleman standing at ease, round steel helmet, wool field jacket with webbing, small backpack, bolt-action rifle with fixed bayonet held across the chest. Framing: three-quarter view from above, the whole vehicle, aircraft or soldier on its round patch of ground.
 ```
 
-**heavyFighter** · Mitrailleur · référence `png/heavyFighter.png`
+**Mitrailleur** · `heavyFighter`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a machine gunner lying prone behind a light machine gun on a bipod, ammunition box beside him, round helmet. Framing: side view facing right, full subject visible.
+Mitrailleur (heavyFighter). Subject: a machine gunner lying prone behind a light machine gun on its bipod, round steel helmet, an open ammunition box and spent brass cases beside him. Framing: three-quarter view from above, the whole vehicle, aircraft or soldier on its round patch of ground.
 ```
 
-**cruiser** · Char léger · référence `png/cruiser.png`
+**Char léger** · `cruiser`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a light tank with a small turret and a short gun, five road wheels, low hull. Framing: side view facing right, full subject visible.
+Char léger (cruiser). Subject: a small light tank with a compact riveted turret and a short gun, five road wheels, low hull, mud on the tracks. Framing: three-quarter view from above, the whole vehicle, aircraft or soldier on its round patch of ground.
 ```
 
-**battleship** · Char lourd · référence `png/battleship.png`
+**Char lourd** · `battleship`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a heavy tank with a large boxy turret, a long gun with muzzle brake, six road wheels, thick sloped armor. Framing: side view facing right, full subject visible.
+Char lourd (battleship). Subject: a massive heavy tank with a large boxy turret, a long gun with a muzzle brake, six large road wheels, thick sloped armour plates with welding seams. Framing: three-quarter view from above, the whole vehicle, aircraft or soldier on its round patch of ground.
 ```
 
-**battlecruiser** · Chasseur de chars · référence `png/battlecruiser.png`
+**Chasseur de chars** · `battlecruiser`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a turretless tank destroyer with a low sloped casemate and a very long gun. Framing: side view facing right, full subject visible.
+Chasseur de chars (battlecruiser). Subject: a turretless tank destroyer with a low sloped casemate and a very long gun, spare track links bolted to the hull. Framing: three-quarter view from above, the whole vehicle, aircraft or soldier on its round patch of ground.
 ```
 
-**bomber** · Bombardier · référence `png/bomber.png`
+**Bombardier** · `bomber`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a four-engine heavy bomber seen from above, straight wings, glazed nose. Framing: side view facing right, full subject visible.
+Bombardier (bomber). Subject: a four-engine heavy bomber parked on a round concrete hardstand, straight wings, glazed nose, propellers at rest. Framing: three-quarter view from above, the whole vehicle, aircraft or soldier on its round patch of ground.
 ```
 
-**destroyer** · Obusier · référence `png/destroyer.png`
+**Obusier** · `destroyer`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a towed field howitzer with large wheels, a gun shield and the barrel raised at 35 degrees. Framing: side view facing right, full subject visible.
+Obusier (destroyer). Subject: a towed field howitzer with large spoked steel wheels, a gun shield and the barrel raised at about 35 degrees, split trails dug into the ground. Framing: three-quarter view from above, the whole vehicle, aircraft or soldier on its round patch of ground.
 ```
 
-**deathstar** · Canon sur voie ferrée · référence `png/deathstar.png`
+**Canon sur voie ferrée** · `deathstar`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a super-heavy railway gun on a long rail carriage with many wheels, enormous barrel raised. Framing: side view facing right, full subject visible.
+Canon sur voie ferrée (deathstar). Subject: a super-heavy railway gun on a long multi-axle rail carriage standing on a short length of track, enormous barrel raised. Framing: three-quarter view from above, the whole vehicle, aircraft or soldier on its round patch of ground.
 ```
 
-**smallCargo** · Camion · référence `png/smallCargo.png`
+**Camion** · `smallCargo`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a military cargo truck with a canvas-covered rear bed and three axles. Framing: side view facing right, full subject visible.
+Camion (smallCargo). Subject: a military cargo truck with a canvas-covered rear bed, three axles and mud-spattered wheels. Framing: three-quarter view from above, the whole vehicle, aircraft or soldier on its round patch of ground.
 ```
 
-**largeCargo** · Half-track · référence `png/largeCargo.png`
+**Half-track** · `largeCargo`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: an armored half-track personnel carrier with front wheels and rear tracks, open top. Framing: side view facing right, full subject visible.
+Half-track (largeCargo). Subject: an armoured half-track carrier with front wheels and rear tracks, an open-topped troop compartment and a pintle-mounted machine gun. Framing: three-quarter view from above, the whole vehicle, aircraft or soldier on its round patch of ground.
 ```
 
-**recycler** · Dépanneuse · référence `png/recycler.png`
+**Dépanneuse** · `recycler`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a recovery truck with an A-frame crane and a hook at the rear. Framing: side view facing right, full subject visible.
+Dépanneuse (recycler). Subject: a heavy recovery truck with an A-frame crane, winch cable and hook at the rear, chains and tools on its bed. Framing: three-quarter view from above, the whole vehicle, aircraft or soldier on its round patch of ground.
 ```
 
-**espionageProbe** · Tireur d’élite · référence `png/espionageProbe.png`
+**Tireur d’élite** · `espionageProbe`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a sniper lying prone under a camouflage covering, long scoped rifle on a bipod. Framing: side view facing right, full subject visible.
+Tireur d’élite (espionageProbe). Subject: a sniper lying prone under a camouflage cape with leaf scrim, a long rifle with a telescopic sight on a small bipod. Framing: three-quarter view from above, the whole vehicle, aircraft or soldier on its round patch of ground.
 ```
 
-**colonyShip** · Campement du génie · référence `png/colonyShip.png`
+**Campement du génie** · `colonyShip`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: an engineers field camp: a canvas tent with guy ropes and supply crates. Framing: side view facing right, full subject visible.
+Campement du génie (colonyShip). Subject: an engineers field camp: a canvas ridge tent with guy ropes, stacked supply crates, shovels and a coil of wire. Framing: three-quarter view from above, the whole vehicle, aircraft or soldier on its round patch of ground.
 ```
 
-**solarSatellite** · Groupe électrogène · référence `png/solarSatellite.png`
+**Groupe électrogène** · `solarSatellite`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a towed portable electric generator on two wheels with an exhaust stack. Framing: side view facing right, full subject visible.
+Groupe électrogène (solarSatellite). Subject: a two-wheeled towed portable electric generator with a small exhaust stack and cables coiled on top. Framing: three-quarter view from above, the whole vehicle, aircraft or soldier on its round patch of ground.
 ```
 
 ### Défenses
 
-**rocketLauncher** · Lance-roquettes · référence `png/rocketLauncher.png`
+**Lance-roquettes** · `rocketLauncher`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a towed multiple rocket launcher with three rows of tubes angled upward. Framing: side view facing right, full subject visible.
+Lance-roquettes (rocketLauncher). Subject: a towed multiple rocket launcher with three rows of launch tubes angled upward, rockets loaded. Framing: three-quarter view from slightly above, the whole emplacement on its round patch of ground.
 ```
 
-**lightLaser** · Nid de mitrailleuse · référence `png/lightLaser.png`
+**Nid de mitrailleuse** · `lightLaser`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a machine-gun nest behind a curved wall of sandbags, barrel pointing forward. Framing: side view facing right, full subject visible.
+Nid de mitrailleuse (lightLaser). Subject: a machine-gun nest behind a curved wall of sandbags, the gun barrel pointing forward through a gap, ammunition belts. Framing: three-quarter view from slightly above, the whole emplacement on its round patch of ground.
 ```
 
-**heavyLaser** · Canon antichar · référence `png/heavyLaser.png`
+**Canon antichar** · `heavyLaser`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a low towed anti-tank gun with a wide gun shield and a long horizontal barrel. Framing: side view facing right, full subject visible.
+Canon antichar (heavyLaser). Subject: a low towed anti-tank gun with a wide angled gun shield and a long horizontal barrel, its trails spread. Framing: three-quarter view from slightly above, the whole emplacement on its round patch of ground.
 ```
 
-**gaussCannon** · Canon de campagne · référence `png/gaussCannon.png`
+**Canon de campagne** · `gaussCannon`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a towed field gun with a gun shield, large wheels, barrel slightly raised. Framing: side view facing right, full subject visible.
+Canon de campagne (gaussCannon). Subject: a towed field gun with a gun shield, large spoked wheels and the barrel slightly raised. Framing: three-quarter view from slightly above, the whole emplacement on its round patch of ground.
 ```
 
-**ionCannon** · Canon antiaérien · référence `png/ionCannon.png`
+**Canon antiaérien** · `ionCannon`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a twin-barrel anti-aircraft gun on a cruciform platform, barrels pointing steeply up. Framing: side view facing right, full subject visible.
+Canon antiaérien (ionCannon). Subject: a twin-barrel anti-aircraft gun on a cruciform platform, barrels pointing steeply up, ready ammunition clips beside it. Framing: three-quarter view from slightly above, the whole emplacement on its round patch of ground.
 ```
 
-**plasmaTurret** · Casemate · référence `png/plasmaTurret.png`
+**Casemate** · `plasmaTurret`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a concrete coastal casemate half-buried in earth, a heavy gun in its embrasure. Framing: side view facing right, full subject visible.
+Casemate (plasmaTurret). Subject: a heavy concrete coastal casemate half-buried in earth, a large gun barrel protruding from its embrasure. Framing: three-quarter view from slightly above, the whole emplacement on its round patch of ground.
 ```
 
-**smallShieldDome** · Sacs de sable · référence `png/smallShieldDome.png`
+**Sacs de sable** · `smallShieldDome`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a low defensive wall of stacked sandbags. Framing: side view facing right, full subject visible.
+Sacs de sable (smallShieldDome). Subject: a low curved wall of neatly stacked sandbags, a few of them torn and leaking sand. Framing: three-quarter view from slightly above, the whole emplacement on its round patch of ground.
 ```
 
-**largeShieldDome** · Bunker · référence `png/largeShieldDome.png`
+**Bunker** · `largeShieldDome`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a domed concrete bunker covered with earth, with a narrow firing slit. Framing: side view facing right, full subject visible.
+Bunker (largeShieldDome). Subject: a domed concrete bunker partly covered with earth and grass, with a narrow dark firing slit. Framing: three-quarter view from slightly above, the whole emplacement on its round patch of ground.
 ```
 
-**antiBallisticMissile** · Missile d’interception · référence `png/antiBallisticMissile.png`
+**Missile d’interception** · `antiBallisticMissile`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a small interceptor missile on an angled launch rail. Framing: side view facing right, full subject visible.
+Missile d’interception (antiBallisticMissile). Subject: a small interceptor missile with short fins on an angled launch rail. Framing: three-quarter view from slightly above, the whole emplacement on its round patch of ground.
 ```
 
-**interplanetaryMissile** · Fusée · référence `png/interplanetaryMissile.png`
+**Fusée** · `interplanetaryMissile`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a large rocket standing on a launch table next to a service gantry, thin dark red band near the nose. Framing: side view facing right, full subject visible.
+Fusée (interplanetaryMissile). Subject: a large finned rocket standing upright on a launch table beside a steel service gantry, a thin dark red band near the nose. Framing: three-quarter view from slightly above, the whole emplacement on its round patch of ground.
 ```
 
 ### Ressources
 
-**metal** · Acier · référence `png/metal.png`
+**Acier** · `metal`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a stack of three steel ingots. Framing: simple bold icon, front view, readable at 16 pixels.
+Acier (metal). Subject: a neat stack of three heavy steel ingots with a dull metallic sheen. Framing: close-up still life seen from the front, the object filling 85% of the frame, a simple bold silhouette that still reads as a tiny icon.
 ```
 
-**crystal** · Munitions · référence `png/crystal.png`
+**Munitions** · `crystal`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: three artillery shells standing side by side. Framing: simple bold icon, front view, readable at 16 pixels.
+Munitions (crystal). Subject: three brass artillery shells standing side by side, the middle one taller. Framing: close-up still life seen from the front, the object filling 85% of the frame, a simple bold silhouette that still reads as a tiny icon.
 ```
 
-**deuterium** · Carburant · référence `png/deuterium.png`
+**Carburant** · `deuterium`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a military fuel jerrycan with an embossed X. Framing: simple bold icon, front view, readable at 16 pixels.
+Carburant (deuterium). Subject: a military steel jerrycan with an embossed X pattern on its side and a triple handle. Framing: close-up still life seen from the front, the object filling 85% of the frame, a simple bold silhouette that still reads as a tiny icon.
 ```
 
-**energy** · Énergie · référence `png/energy.png`
+**Énergie** · `energy`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a lightning bolt inside a round badge. Framing: simple bold icon, front view, readable at 16 pixels.
+Énergie (energy). Subject: an enamelled metal high-voltage warning plate showing one bold lightning bolt and no lettering. Framing: close-up still life seen from the front, the object filling 85% of the frame, a simple bold silhouette that still reads as a tiny icon.
 ```
 
 ### Bâtiments
 
-**metalMine** · Mine de fer · référence `png/metalMine.png`
+**Mine de fer** · `metalMine`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a mine head: lattice headframe tower with a winding wheel, a spoil heap and a mine cart full of ore. Framing: side view of a single building facing right, full subject visible.
+Mine de fer (metalMine). Subject: an iron mine head: a steel lattice headframe with its winding wheel, a spoil heap and a mine cart full of ore on rails. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
-**crystalMine** · Usine de munitions · référence `png/crystalMine.png`
+**Usine de munitions** · `crystalMine`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: an ammunition factory: sawtooth-roof workshop with a chimney, artillery shells and a crate in front. Framing: side view of a single building facing right, full subject visible.
+Usine de munitions (crystalMine). Subject: an ammunition factory: a brick workshop with a sawtooth roof and a chimney, artillery shells and crates stacked in front. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
-**deuteriumSynth** · Raffinerie · référence `png/deuteriumSynth.png`
+**Raffinerie** · `deuteriumSynth`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a fuel refinery with two distillation columns, pipes and a cylindrical storage tank. Framing: side view of a single building facing right, full subject visible.
+Raffinerie (deuteriumSynth). Subject: a fuel refinery: two tall distillation columns, a tangle of pipes and a cylindrical storage tank. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
-**solarPlant** · Centrale thermique · référence `png/solarPlant.png`
+**Centrale thermique** · `solarPlant`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a coal power station with two chimneys and a high-voltage lattice pylon. Framing: side view of a single building facing right, full subject visible.
+Centrale thermique (solarPlant). Subject: a coal-fired power station with two smoking chimneys, a coal heap and a high-voltage lattice pylon. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
-**fusionReactor** · Barrage hydroélectrique · référence `png/fusionReactor.png`
+**Barrage hydroélectrique** · `fusionReactor`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a hydroelectric dam with a turbine house at its base and spillway openings. Framing: side view of a single building facing right, full subject visible.
+Barrage hydroélectrique (fusionReactor). Subject: a concrete hydroelectric dam with water rushing from its spillways and a turbine house at its foot. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
-**metalStorage** · Dépôt d’acier · référence `png/metalStorage.png`
+**Dépôt d’acier** · `metalStorage`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a semicircular corrugated steel hut with a stack of steel girders. Framing: side view of a single building facing right, full subject visible.
+Dépôt d’acier (metalStorage). Subject: a semicircular corrugated-steel hut with stacks of steel girders and plates in front. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
-**crystalStorage** · Dépôt de munitions · référence `png/crystalStorage.png`
+**Dépôt de munitions** · `crystalStorage`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: an earth-covered ammunition bunker with a steel door and stacked crates. Framing: side view of a single building facing right, full subject visible.
+Dépôt de munitions (crystalStorage). Subject: an earth-covered ammunition bunker with a heavy steel door, crates and shells stacked at the entrance. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
-**deuteriumTank** · Dépôt de carburant · référence `png/deuteriumTank.png`
+**Dépôt de carburant** · `deuteriumTank`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a fuel depot with two cylindrical tanks and a stack of fuel drums. Framing: side view of a single building facing right, full subject visible.
+Dépôt de carburant (deuteriumTank). Subject: a fuel depot with two large cylindrical tanks, pipes and rows of fuel drums. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
-**roboticsFactory** · Usine · référence `png/roboticsFactory.png`
+**Usine** · `roboticsFactory`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a large sawtooth-roof factory with a tall chimney. Framing: side view of a single building facing right, full subject visible.
+Usine (roboticsFactory). Subject: a large brick factory with a sawtooth roof and a tall chimney. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
-**shipyard** · Usine de blindés · référence `png/shipyard.png`
+**Usine de blindés** · `shipyard`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a tank assembly hall with a big open door, a tank rolling out and a gantry crane. Framing: side view of a single building facing right, full subject visible.
+Usine de blindés (shipyard). Subject: a tank assembly hall with a large open door, a new tank rolling out and an overhead gantry crane. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
-**researchLab** · Bureau d’études · référence `png/researchLab.png`
+**Bureau d’études** · `researchLab`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a research building with a tall radio mast and antenna wires. Framing: side view of a single building facing right, full subject visible.
+Bureau d’études (researchLab). Subject: a brick research building with a tall radio mast, antenna wires and a few lit windows. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
-**naniteFactory** · Arsenal · référence `png/naniteFactory.png`
+**Arsenal** · `naniteFactory`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a large arsenal complex of several workshops and chimneys. Framing: side view of a single building facing right, full subject visible.
+Arsenal (naniteFactory). Subject: a large arsenal complex: several workshops with chimneys, a railway siding and gun barrels on racks. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
-**terraformer** · Génie · référence `png/terraformer.png`
+**Génie** · `terraformer`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a tracked bulldozer pushing a mound of earth. Framing: side view of a single building facing right, full subject visible.
+Génie (terraformer). Subject: a tracked bulldozer pushing a mound of earth, its blade dented. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
-**missileSilo** · Base de lancement · référence `png/missileSilo.png`
+**Base de lancement** · `missileSilo`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a rocket launch site: a rocket on an angled erector, a concrete pad and a small blockhouse. Framing: side view of a single building facing right, full subject visible.
+Base de lancement (missileSilo). Subject: a rocket launch site: a rocket on an angled erector, a concrete pad and a small blockhouse. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
-**lunarBase** · Avant-poste · référence `png/lunarBase.png`
+**Avant-poste** · `lunarBase`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a fortified forward outpost on a hill: watchtower, sandbags, barbed wire and a tent. Framing: side view of a single building facing right, full subject visible.
+Avant-poste (lunarBase). Subject: a fortified forward outpost on a small hill: a wooden watchtower, sandbags, barbed wire and a tent. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
-**sensorPhalanx** · Station radar · référence `png/sensorPhalanx.png`
+**Station radar** · `sensorPhalanx`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a radar station: a rectangular mesh antenna on a lattice tower and a control hut. Framing: side view of a single building facing right, full subject visible.
+Station radar (sensorPhalanx). Subject: a radar station: a large rectangular mesh antenna on a lattice tower and a control hut with cables. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
-**jumpGate** · Aérodrome · référence `png/jumpGate.png`
+**Aérodrome** · `jumpGate`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a military airfield: a hangar, a control tower, runway markings and a windsock. Framing: side view of a single building facing right, full subject visible.
+Aérodrome (jumpGate). Subject: a military airfield: a hangar, a small control tower, a stretch of unmarked runway and a windsock. Framing: high three-quarter aerial view of the whole site, on a round plot of ground that fades into the black background.
 ```
 
 ### Recherches
 
-**energyTech** · Électrification · référence `png/energyTech.png`
+**Électrification** · `energyTech`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: an electrical transformer with three porcelain insulators and cables. Framing: single object centered, slight three-quarter view.
+Électrification (energyTech). Subject: an electrical transformer with three tall porcelain insulators and heavy cables. Framing: close-up still life, three-quarter view from slightly above, the object on a dark wooden workbench that fades into the black background.
 ```
 
-**laserTech** · Optique · référence `png/laserTech.png`
+**Optique** · `laserTech`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a military searchlight on a tripod projecting a beam. Framing: single object centered, slight three-quarter view.
+Optique (laserTech). Subject: an anti-aircraft searchlight on its trailer, its powerful beam projecting into the darkness. Framing: close-up still life, three-quarter view from slightly above, the object on a dark wooden workbench that fades into the black background.
 ```
 
-**ionTech** · Radio · référence `png/ionTech.png`
+**Radio** · `ionTech`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a large radio vacuum tube with visible electrodes. Framing: single object centered, slight three-quarter view.
+Radio (ionTech). Subject: a large glass radio transmitting valve with visible electrodes and a faint warm filament glow, mounted on a radio chassis. Framing: close-up still life, three-quarter view from slightly above, the object on a dark wooden workbench that fades into the black background.
 ```
 
-**hyperspaceTech** · Cartographie · référence `png/hyperspaceTech.png`
+**Cartographie** · `hyperspaceTech`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a folded military map with a dashed route and drafting dividers. Framing: single object centered, slight three-quarter view.
+Cartographie (hyperspaceTech). Subject: a folded topographic map without any lettering, a route drawn in pencil, brass drafting dividers and a compass lying on it. Framing: close-up still life, three-quarter view from slightly above, the object on a dark wooden workbench that fades into the black background.
 ```
 
-**plasmaTech** · Métallurgie · référence `png/plasmaTech.png`
+**Métallurgie** · `plasmaTech`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a foundry crucible pouring molten metal into a mold. Framing: single object centered, slight three-quarter view.
+Métallurgie (plasmaTech). Subject: a foundry crucible pouring molten metal into a sand mould, a few sparks and a dim orange glow. Framing: close-up still life, three-quarter view from slightly above, the object on a dark wooden workbench that fades into the black background.
 ```
 
-**combustionDrive** · Moteur à explosion · référence `png/combustionDrive.png`
+**Moteur à explosion** · `combustionDrive`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: an inline four-cylinder engine block with a pulley. Framing: single object centered, slight three-quarter view.
+Moteur à explosion (combustionDrive). Subject: an oily, well-used six-cylinder truck engine on an engine stand. Framing: close-up still life, three-quarter view from slightly above, the object on a dark wooden workbench that fades into the black background.
 ```
 
-**impulseDrive** · Moteur d’avion · référence `png/impulseDrive.png`
+**Moteur d’avion** · `impulseDrive`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a radial aircraft engine with a three-blade propeller, front view. Framing: single object centered, slight three-quarter view.
+Moteur d’avion (impulseDrive). Subject: a radial aircraft engine with a three-blade propeller on an engine stand. Framing: close-up still life, three-quarter view from slightly above, the object on a dark wooden workbench that fades into the black background.
 ```
 
-**hyperspaceDrive** · Moteur-fusée · référence `png/hyperspaceDrive.png`
+**Moteur-fusée** · `hyperspaceDrive`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a rocket engine: combustion chamber, nozzle bell and a small flame. Framing: single object centered, slight three-quarter view.
+Moteur-fusée (hyperspaceDrive). Subject: an early liquid-fuel rocket engine on a test stand: combustion chamber, nozzle bell, pipes and a short flame. Framing: close-up still life, three-quarter view from slightly above, the object on a dark wooden workbench that fades into the black background.
 ```
 
-**espionageTech** · Renseignement · référence `png/espionageTech.png`
+**Renseignement** · `espionageTech`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a pair of military binoculars. Framing: single object centered, slight three-quarter view.
+Renseignement (espionageTech). Subject: a pair of military binoculars on a worn leather case, beside a blank folded document. Framing: close-up still life, three-quarter view from slightly above, the object on a dark wooden workbench that fades into the black background.
 ```
 
-**computerTech** · Chiffrement · référence `png/computerTech.png`
+**Chiffrement** · `computerTech`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a generic electromechanical cipher machine with rotors and a keyboard. Framing: single object centered, slight three-quarter view.
+Chiffrement (computerTech). Subject: a generic electromechanical cipher machine in an open wooden case: three rotors, a keyboard with blank keys and small lamps. Framing: close-up still life, three-quarter view from slightly above, the object on a dark wooden workbench that fades into the black background.
 ```
 
-**astrophysics** · Observation · référence `png/astrophysics.png`
+**Observation** · `astrophysics`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a field telescope on a tripod. Framing: single object centered, slight three-quarter view.
+Observation (astrophysics). Subject: an artillery scissors periscope (twin observation telescope) on a tripod. Framing: close-up still life, three-quarter view from slightly above, the object on a dark wooden workbench that fades into the black background.
 ```
 
-**researchNetwork** · Transmissions · référence `png/researchNetwork.png`
+**Réseau de transmissions** · `researchNetwork`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a field telephone with its handset and a cable reel. Framing: single object centered, slight three-quarter view.
+Réseau de transmissions (researchNetwork). Subject: a field telephone in its leather case with the handset, next to a cable reel on its frame. Framing: close-up still life, three-quarter view from slightly above, the object on a dark wooden workbench that fades into the black background.
 ```
 
-**gravitonTech** · Balistique · référence `png/gravitonTech.png`
+**Balistique** · `gravitonTech`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a ballistic trajectory: dashed arc from a small gun to a target, shell at the apex. Framing: single object centered, slight three-quarter view.
+Balistique (gravitonTech). Subject: a sectioned artillery shell lying on graph paper with a hand-drawn trajectory arc, a brass gunner’s quadrant beside it. Framing: close-up still life, three-quarter view from slightly above, the object on a dark wooden workbench that fades into the black background.
 ```
 
-**weaponsTech** · Armement · référence `png/weaponsTech.png`
+**Armement** · `weaponsTech`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: two crossed rifles over an ammunition crate. Framing: single object centered, slight three-quarter view.
+Armement (weaponsTech). Subject: two bolt-action rifles crossed in front of an open wooden ammunition crate full of cartridges. Framing: close-up still life, three-quarter view from slightly above, the object on a dark wooden workbench that fades into the black background.
 ```
 
-**shieldingTech** · Camouflage · référence `png/shieldingTech.png`
+**Camouflage** · `shieldingTech`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: a camouflage net draped over a vehicle shape. Framing: single object centered, slight three-quarter view.
+Camouflage (shieldingTech). Subject: a small military vehicle almost hidden under a camouflage net with leaf-shaped scrim. Framing: close-up still life, three-quarter view from slightly above, the object on a dark wooden workbench that fades into the black background.
 ```
 
-**armourTech** · Blindage · référence `png/armourTech.png`
+**Blindage** · `armourTech`
 
 ```text
-Flat vector military pictogram in a clean 1940s field-manual style. Matte limited palette only: grey-green #4A5D4A, light grey-green #5C6B5C, dark olive #3A4A3A, deep black #1A1A1A, anthracite #2C2C2C, ivory #E8E4D9; dark red #6B1E1E only for tiny danger details (warhead band, flame, target). Thin black outlines, flat fills, subtle ivory edge highlights, no gradients, no glow, no texture. Transparent background, soft flat ground shadow, subject centered, square 1:1, same scale and line weight across the whole set. Subject: thick riveted armor plates with a shell impact. Framing: single object centered, slight three-quarter view.
+Blindage (armourTech). Subject: a thick riveted armour test plate on a stand, with a deep shell impact crater and cracks. Framing: close-up still life, three-quarter view from slightly above, the object on a dark wooden workbench that fades into the black background.
 ```
