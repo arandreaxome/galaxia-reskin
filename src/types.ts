@@ -154,8 +154,11 @@ export type Target = {
   };
 };
 
+/** Catégories de notifications de l'extension, chacune activable dans les Réglages. */
+export type NotifCategory = 'queues' | 'storage' | 'fleets' | 'hostile' | 'reports' | 'social';
+
 /** Réglages de l'extension (onglet Réglages), lus aussi par content.ts. Sans valeur, `assets` suit `skin`. */
-export type Settings = { skin?: boolean; assets?: boolean; rename?: boolean };
+export type Settings = { skin?: boolean; assets?: boolean; rename?: boolean; notifications?: Partial<Record<NotifCategory, boolean>> };
 
 /** Repasse des secteurs lancée depuis l'onglet Cibles : avancement, puis bilan. */
 export type Scan = { total: number; done: number; running: boolean; at: number; error?: string };

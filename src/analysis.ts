@@ -3,7 +3,7 @@
 
 import { clock, coords, duration, num, place } from './format';
 import { label, missionName, resourceName } from './names';
-import type { Coords, Fleet, GameState, Message, Planet, Resource, Resources, SocialCounter } from './types';
+import type { Coords, Fleet, GameState, Message, NotifCategory, Planet, Resource, Resources, SocialCounter } from './types';
 
 export const RESOURCES: Resource[] = ['metal', 'crystal', 'deuterium'];
 
@@ -12,7 +12,8 @@ export const STORAGE_WARNING = 30 * 60_000;
 
 /** `planet` : planète à sélectionner dans le jeu avant d'ouvrir la page (openGame). */
 export type Alert = { level: 'danger' | 'warning'; text: string; route: string; planet?: string };
-export type GameEvent = { id: string; level: 'danger' | 'info'; title: string; message: string; route: string; planet?: string };
+/** `category` : réglage qui l'autorise ; sans catégorie, toujours notifié. */
+export type GameEvent = { id: string; level: 'danger' | 'info'; title: string; message: string; route: string; planet?: string; category?: NotifCategory };
 
 /** Ta planète (ou lune) à ces coordonnées. */
 const ownAt = (s: GameState, c: Coords) => s.planets.find(p => p.g === c.g && p.s === c.s && p.p === c.p && Boolean(p.moon) === Boolean(c.moon));
@@ -172,6 +173,7 @@ export function diff(prev: GameState | null, next: GameState, memory: Memory): {
           message: after.buildQueue.length ? names : `${names}\nFile de construction vide`,
           route: '#/',
           planet: after.id,
+          category: 'queues',
         });
       }
 
@@ -184,6 +186,7 @@ export function diff(prev: GameState | null, next: GameState, memory: Memory): {
           message: before.shipQueue.map(lot => `${num(lot.count)} × ${label(lot.key)}`).join(', '),
           route: '#/shipyard',
           planet: after.id,
+          category: 'queues',
         });
       }
     }
@@ -198,6 +201,7 @@ export function diff(prev: GameState | null, next: GameState, memory: Memory): {
         message: next.user.researchQueue.length ? names : `${names}\nAucune recherche en cours`,
         route: '#/research',
         planet: bestLab(next)?.id,
+        category: 'queues',
       });
     }
 
@@ -214,12 +218,13 @@ export function diff(prev: GameState | null, next: GameState, memory: Memory): {
         message: [shipsText(f.ships), cargo && `Cargaison : ${cargo}`].filter(Boolean).join('\n') || (f.mission && missionName(f.mission)) || 'Flotte',
         route: '#/fleet',
         planet: f.originId,
+        category: 'fleets',
       });
     }
 
     for (const [key, title, route] of SOCIAL) {
       const count = next.social?.[key] ?? 0;
-      if (count > (prev.social?.[key] ?? 0)) events.push({ id: `social:${key}`, level: 'info', title, message: `${count} en attente`, route });
+      if (count > (prev.social?.[key] ?? 0)) events.push({ id: `social:${key}`, level: 'info', title, message: `${count} en attente`, route, category: 'social' });
     }
   }
 
@@ -233,6 +238,7 @@ export function diff(prev: GameState | null, next: GameState, memory: Memory): {
       message: `Cible : ${place(f.targetName, f.target)}\nImpact à ${clock(f.arriveAt)}, dans ${duration(f.arriveAt - now)}`,
       route: '#/fleet',
       planet: ownAt(next, f.target)?.id,
+      category: 'hostile',
     });
   }
 
@@ -255,6 +261,7 @@ export function diff(prev: GameState | null, next: GameState, memory: Memory): {
         message: level === 'full' ? 'La production s’arrête tant que le stockage est plein.' : `Plein à ${clock(t)}, dans ${duration(t - now)}`,
         route: '#/resources',
         planet: p.id,
+        category: 'storage',
       });
     }
   }
@@ -274,6 +281,6 @@ export function messageEvents(messages: Message[], since: number): GameEvent[] {
         : !loot ? 'Voir le rapport de combat'
         : m.data?.perspective === 'defender' ? `Pillé : ${loot}`
         : `Butin : ${loot}`;
-      return { id: `msg:${m.id}`, level: 'info', title: m.title, message: message.slice(0, 200), route: '#/messages' };
+      return { id: `msg:${m.id}`, level: 'info', title: m.title, message: message.slice(0, 200), route: '#/messages', category: 'reports' };
     });
 }

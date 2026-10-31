@@ -6,7 +6,7 @@ import { setThemedNames } from './names';
 import { debrisEvents, emptyDebris, mergeDebrisSystem, type DebrisStore } from './debris';
 import { openGame } from './open-game';
 import { emptyStore, mergeCombats, mergeReports, mergeSystem, reconcile, type TargetStore } from './targets';
-import type { GalaxySystem, GameState, Message, Scan, Settings, Snapshot, Status } from './types';
+import type { GalaxySystem, GameState, Message, NotifCategory, Scan, Settings, Snapshot, Status } from './types';
 
 const GAME = 'https://galaxia.eldau.xyz/';
 const API = `${GAME}api`;
@@ -101,7 +101,7 @@ async function poll() {
 
   const snapshot: Snapshot = { state, offset: state.serverTime - Date.now(), fetchedAt: Date.now() };
   await chrome.storage.local.set({ snapshot, status: 'ok', memory });
-  show(events);
+  show(events.filter(e => wanted(stored.settings, e.category)));
   await updateBadge();
   scheduleDeadline(snapshot);
 }
@@ -128,6 +128,9 @@ function scheduleDeadline({ state, offset }: Snapshot) {
   if (t == null) void chrome.alarms.clear('deadline');
   else void chrome.alarms.create('deadline', { when: t - offset + 2_000 });
 }
+
+/** Catégorie décochée dans les Réglages : rien n'est notifié (sans catégorie : toujours). */
+const wanted = (settings: Settings | undefined, category?: NotifCategory) => !category || settings?.notifications?.[category] !== false;
 
 function notify(e: GameEvent) {
   // L'identifiant porte la page du jeu à ouvrir au clic, et la planète à y sélectionner.
