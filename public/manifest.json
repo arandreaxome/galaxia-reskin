@@ -8,7 +8,7 @@
   "background": { "service_worker": "background.js", "type": "module" },
   "content_scripts": [
     { "matches": ["https://galaxia.eldau.xyz/*"], "js": ["hook.js"], "run_at": "document_start", "world": "MAIN" },
-    { "matches": ["https://galaxia.eldau.xyz/*"], "js": ["content.js", "sonar.js", "rename.js"], "css": ["skin.css", "skin-assets.css"], "run_at": "document_start" }
+    { "matches": ["https://galaxia.eldau.xyz/*"], "js": ["content.js", "sonar.js", "rename.js", "topbar.js"], "css": ["skin.css", "skin-assets.css"], "run_at": "document_start" }
   ],
   "web_accessible_resources": [{ "resources": ["skin/*"], "matches": ["https://galaxia.eldau.xyz/*"] }],
   "action": {

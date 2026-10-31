@@ -1351,3 +1351,29 @@ html.radar-skin .rtree-scroll::after {
   border: 1px solid var(--c-ivory-3);
   pointer-events: none;
 }
+
+/* --------------------------------------------------------------------------
+   Barre du haut : stocks et minuteurs à la machine à écrire, jauge de remplissage
+   du stockage, brique à partir de 90 % (topbar.js).
+   -------------------------------------------------------------------------- */
+
+html.radar-skin .topbar :is(.res-txt b, .pill-time) > span {
+  color: var(--c-ivory);
+  font-family: var(--skin-typewriter);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+html.radar-skin .topbar .res {
+  position: relative;
+}
+
+html.radar-skin .topbar .res[style*="--fill"]::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gauge) calc(var(--fill) * 100%), var(--c-olive) 0);
+}

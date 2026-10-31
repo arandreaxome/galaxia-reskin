@@ -20,6 +20,7 @@ export default defineConfig({
         hook: 'src/hook.ts',
         sonar: 'src/sonar.ts',
         rename: 'src/rename.ts',
+        topbar: 'src/topbar.ts',
       },
       output: {
         entryFileNames: '[name].js',
