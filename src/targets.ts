@@ -161,7 +161,7 @@ export function lootOf(t: Target): number | null {
 export const cargoFor = (loot: number, hyperspaceTech = 0) => Math.ceil(loot / Math.floor(LARGE_CARGO * (1 + 0.05 * hyperspaceTech)));
 
 /** Ta planète la plus proche dans la même galaxie, en nombre de systèmes. */
-export function nearest(t: Target, planets: Planet[]): { planet: Planet; systems: number } | null {
+export function nearest(t: { g: number; s: number }, planets: Planet[]): { planet: Planet; systems: number } | null {
   let best: { planet: Planet; systems: number } | null = null;
   for (const planet of planets) {
     if (planet.moon || planet.g !== t.g) continue;

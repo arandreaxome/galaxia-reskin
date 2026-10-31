@@ -3,6 +3,7 @@
 
 import { alerts, diff, initialMemory, messageEvents, nextDeadline, type GameEvent, type Memory } from './analysis';
 import { setThemedNames } from './names';
+import { debrisEvents, emptyDebris, mergeDebrisSystem, type DebrisStore } from './debris';
 import { openGame } from './open-game';
 import { emptyStore, mergeCombats, mergeReports, mergeSystem, reconcile, type TargetStore } from './targets';
 import type { GalaxySystem, GameState, Message, Scan, Settings, Snapshot, Status } from './types';
@@ -23,6 +24,7 @@ type Stored = {
   settings?: Settings;
   /** Systèmes que la carte du jeu te dit avoir vus, ou où tu as une planète (« g:s »). */
   viewedSystems?: string[];
+  debris?: DebrisStore;
   /** Dernière lecture de la carte de la galaxie. */
   mapAt?: number;
   scan?: Scan;
@@ -153,21 +155,35 @@ function show(events: GameEvent[]) {
   });
 }
 
-// Les cibles changent depuis plusieurs sources (relevés, systèmes captés) : une écriture après l'autre.
-let targetsWrite: Promise<void> = Promise.resolve();
+// Cibles et débris changent depuis plusieurs sources (relevés, systèmes captés) : une écriture après l'autre.
+let storeWrite: Promise<void> = Promise.resolve();
 
-function updateTargets(change: (store: TargetStore) => TargetStore, extra: Partial<Stored> = {}) {
-  targetsWrite = targetsWrite
-    .then(async () => {
-      const { targets = emptyStore() } = await read();
-      await chrome.storage.local.set({ targets: change(targets), ...extra });
-    })
-    .catch(() => {});
-  return targetsWrite;
+function queueWrite(write: () => Promise<void>) {
+  storeWrite = storeWrite.then(write).catch(() => {});
+  return storeWrite;
 }
 
-const importMessages = (messages: Message[]) =>
-  updateTargets(store => mergeCombats(mergeReports(store, messages), messages), { reportsAt: Date.now() });
+function updateTargets(change: (store: TargetStore) => TargetStore, extra: Partial<Stored> = {}) {
+  return queueWrite(async () => {
+    const { targets = emptyStore() } = await read();
+    await chrome.storage.local.set({ targets: change(targets), ...extra });
+  });
+}
+
+function updateDebris(change: (store: DebrisStore) => DebrisStore) {
+  return queueWrite(async () => {
+    const { debris = emptyDebris() } = await read();
+    await chrome.storage.local.set({ debris: change(debris) });
+  });
+}
+
+/** Combats et recyclages des messages : la liste des événements de débris est refaite à chaque relecture. */
+const importDebris = (messages: Message[]) => updateDebris(store => ({ ...store, events: debrisEvents(messages) }));
+
+const importMessages = (messages: Message[]) => {
+  void importDebris(messages);
+  return updateTargets(store => mergeCombats(mergeReports(store, messages), messages), { reportsAt: Date.now() });
+};
 
 /** Rapports et carte de la galaxie (gratuits), relus à l'ouverture de l'onglet Cibles, au plus toutes les 2 min. */
 async function refreshReports(force = false) {
@@ -180,6 +196,7 @@ async function refreshReports(force = false) {
       api<{ known?: Record<string, { pirates?: number; mine?: number; viewedAt?: number }> }>('/galaxy-map', token),
     ]);
     const now = Date.now() + (snapshot?.offset ?? 0);
+    void importDebris(messages);
     await updateTargets(store => reconcile(mergeCombats(mergeReports(store, messages), messages), map.known ?? {}, now), {
       reportsAt: Date.now(),
       mapAt: Date.now(),
@@ -200,7 +217,9 @@ const isSystem = (data: unknown): data is GalaxySystem => {
 async function onSystem(data: unknown) {
   if (!isSystem(data)) return;
   const { snapshot } = await read();
-  await updateTargets(store => mergeSystem(store, data, Date.now() + (snapshot?.offset ?? 0)));
+  const at = Date.now() + (snapshot?.offset ?? 0);
+  void updateDebris(store => mergeDebrisSystem(store, data, at));
+  await updateTargets(store => mergeSystem(store, data, at));
 }
 
 let scanning = false;

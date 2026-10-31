@@ -534,6 +534,12 @@ select {
   margin: 0;
 }
 
+/* Onglet Débris : bilan des champs affichés. */
+.debris-total {
+  margin: 0;
+  font-size: var(--size-small);
+}
+
 .target-main {
   display: grid;
   grid-template-columns: auto auto minmax(0, 1fr) auto;

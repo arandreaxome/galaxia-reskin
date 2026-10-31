@@ -3,8 +3,10 @@ import { alerts, fleetNextTime, foreignLabel, fullAt, resourcesAt, RESOURCES, sh
 import { clock, coords, duration, num, place } from '../format';
 import { FLEET_STATES, label, missionName, resourceName, setThemedNames } from '../names';
 import { openGame } from '../open-game';
+import type { DebrisStore } from '../debris';
 import { targetStatus, type TargetStore } from '../targets';
 import type { Fleet, GameState, Planet, Scan, Settings, Snapshot, Status } from '../types';
+import { DebrisView } from './Debris';
 import { SettingsView } from './Settings';
 import { Targets } from './Targets';
 
@@ -16,8 +18,9 @@ type Stored = {
   settings?: Settings;
   viewedSystems?: string[];
   scan?: Scan;
+  debris?: DebrisStore;
 };
-type Tab = 'empire' | 'targets' | 'settings';
+type Tab = 'empire' | 'targets' | 'debris' | 'settings';
 
 const open = (route = '#/') => void openGame(route);
 
@@ -28,7 +31,7 @@ const TAB_KEY = 'radar.tab';
 function loadTab(): Tab {
   try {
     const tab = localStorage.getItem(TAB_KEY);
-    return tab === 'targets' || tab === 'settings' ? tab : 'empire';
+    return tab === 'targets' || tab === 'debris' || tab === 'settings' ? tab : 'empire';
   } catch {
     return 'empire';
   }
@@ -39,7 +42,7 @@ function useStored(): Stored {
   const [stored, setStored] = useState<Stored>({});
   useEffect(() => {
     const load = () =>
-      void (chrome.storage.local.get(['snapshot', 'status', 'targets', 'reportsAt', 'settings', 'viewedSystems', 'scan']) as Promise<Stored>).then(setStored);
+      void (chrome.storage.local.get(['snapshot', 'status', 'targets', 'reportsAt', 'settings', 'viewedSystems', 'scan', 'debris']) as Promise<Stored>).then(setStored);
     load();
     chrome.storage.onChanged.addListener(load);
     // Relevé frais à l'ouverture de la popup.
@@ -67,7 +70,7 @@ const STATUS_TEXT: Record<Status, (fetchedAt: number) => string> = {
 };
 
 export function App() {
-  const { snapshot, status = 'ok', targets, reportsAt, settings, viewedSystems, scan } = useStored();
+  const { snapshot, status = 'ok', targets, reportsAt, settings, viewedSystems, scan, debris } = useStored();
   setThemedNames(Boolean(settings?.rename));
   const now = useServerNow(snapshot?.offset ?? 0);
   const [tab, setTab] = useState(loadTab);
@@ -120,6 +123,9 @@ export function App() {
           Cibles
           {ready > 0 && <span className="badge ok" title="Repaires prêts à attaquer">{ready}</span>}
         </button>
+        <button className={tab === 'debris' ? 'active' : ''} aria-pressed={tab === 'debris'} onClick={() => selectTab('debris')}>
+          Débris
+        </button>
         <button className={tab === 'settings' ? 'active' : ''} aria-pressed={tab === 'settings'} onClick={() => selectTab('settings')}>
           Réglages
         </button>
@@ -127,6 +133,8 @@ export function App() {
 
       {tab === 'settings' ? (
         <SettingsView settings={settings} />
+      ) : tab === 'debris' ? (
+        <DebrisView state={state} store={debris} now={now} page={page} />
       ) : tab === 'targets' ? (
         <Targets state={state} store={targets} reportsAt={reportsAt} viewedSystems={viewedSystems} scan={scan} now={now} page={page} />
       ) : (

@@ -92,6 +92,8 @@ export type Message = {
     ships?: Record<string, number>;
     defense?: Record<string, number>;
     protectedUntil?: number | null;
+    /** Rapports de combat : champ de débris créé à la position. */
+    debris?: { metal?: number; crystal?: number } | null;
   };
 };
 
@@ -99,8 +101,11 @@ export type Message = {
 export type GalaxySystem = {
   g: number;
   s: number;
+  /** Champ de débris de l'espace inconnu (position 16). */
+  expeditionDebris?: { metal?: number; crystal?: number } | null;
   slots: {
     p: number;
+    debris?: { metal?: number; crystal?: number; natural?: boolean } | null;
     known?: {
       mine?: boolean;
       occupied?: boolean;
