@@ -1,7 +1,6 @@
-// Catalogue du pack : quel dessin remplace quelle image du jeu, sous quel nom, et comment le décrire
-// à un générateur d'images (brief en anglais, la langue que ces outils comprennent le mieux).
+// Catalogue du pack : quelle image du jeu est remplacée, sous quel nom, et comment décrire la nouvelle
+// au générateur d'images (brief en anglais, la langue que ces outils comprennent le mieux).
 
-import * as P from './parts.ts';
 import { el, svg } from './svg.ts';
 
 export type Group = 'Unités' | 'Défenses' | 'Ressources' | 'Bâtiments' | 'Recherches';
@@ -16,85 +15,84 @@ export type Asset = {
   brief: string;
   /** Sélecteur supplémentaire, quand l'image du jeu n'a pas de fichier (intégrée en data:). */
   alt?: string;
-  svg: string;
 };
 
 const make =
-  (group: Group, size = 128) =>
-  (key: string, name: string, brief: string, draw: () => string[], alt?: string): Asset => ({ key, name, group, brief, alt, svg: svg(size, ...draw()) });
+  (group: Group) =>
+  (key: string, name: string, brief: string, alt?: string): Asset => ({ key, name, group, brief, alt });
 
 const unit = make('Unités');
 const defense = make('Défenses');
-const resource = make('Ressources', 64);
+const resource = make('Ressources');
 const building = make('Bâtiments');
 const research = make('Recherches');
 
 export const ASSETS: Asset[] = [
-  unit('lightFighter', 'Fantassin', 'an infantry rifleman standing at ease, round steel helmet, wool field jacket with webbing, small backpack, bolt-action rifle with fixed bayonet held across the chest', P.rifleman),
-  unit('heavyFighter', 'Mitrailleur', 'a machine gunner lying prone behind a light machine gun on its bipod, round steel helmet, an open ammunition box and spent brass cases beside him', P.machineGunner),
-  unit('cruiser', 'Char léger', 'a small light tank with a compact riveted turret and a short gun, five road wheels, low hull, mud on the tracks', P.lightTank),
-  unit('battleship', 'Char lourd', 'a massive heavy tank with a large boxy turret, a long gun with a muzzle brake, six large road wheels, thick sloped armour plates with welding seams', P.heavyTank),
-  unit('battlecruiser', 'Chasseur de chars', 'a turretless tank destroyer with a low sloped casemate and a very long gun, spare track links bolted to the hull', P.tankDestroyer),
-  unit('bomber', 'Bombardier', 'a four-engine heavy bomber parked on a round concrete hardstand, straight wings, glazed nose, propellers at rest', P.bomber),
-  unit('destroyer', 'Obusier', 'a towed field howitzer with large spoked steel wheels, a gun shield and the barrel raised at about 35 degrees, split trails dug into the ground', P.howitzer),
-  unit('deathstar', 'Canon sur voie ferrée', 'a super-heavy railway gun on a long multi-axle rail carriage standing on a short length of track, enormous barrel raised', P.railwayGun),
-  unit('smallCargo', 'Camion', 'a military cargo truck with a canvas-covered rear bed, three axles and mud-spattered wheels', P.truck),
-  unit('largeCargo', 'Half-track', 'an armoured half-track carrier with front wheels and rear tracks, an open-topped troop compartment and a pintle-mounted machine gun', P.halfTrack),
-  unit('recycler', 'Dépanneuse', 'a heavy recovery truck with an A-frame crane, winch cable and hook at the rear, chains and tools on its bed', P.recoveryTruck),
-  unit('espionageProbe', 'Tireur d’élite', 'a sniper lying prone under a camouflage cape with leaf scrim, a long rifle with a telescopic sight on a small bipod', P.sniper),
-  unit('colonyShip', 'Campement du génie', 'an engineers field camp: a canvas ridge tent with guy ropes, stacked supply crates, shovels and a coil of wire', P.camp),
-  unit('solarSatellite', 'Groupe électrogène', 'a two-wheeled towed portable electric generator with a small exhaust stack and cables coiled on top', P.generator),
+  unit('lightFighter', 'Fantassin', 'an infantry rifleman standing at ease, round steel helmet, wool field jacket with webbing, small backpack, bolt-action rifle with fixed bayonet held across the chest'),
+  unit('heavyFighter', 'Mitrailleur', 'a machine gunner lying prone behind a light machine gun on its bipod, round steel helmet, an open ammunition box and spent brass cases beside him'),
+  unit('cruiser', 'Char léger', 'a small light tank with a compact riveted turret and a short gun, five road wheels, low hull, mud on the tracks'),
+  unit('battleship', 'Char lourd', 'a massive heavy tank with a large boxy turret, a long gun with a muzzle brake, six large road wheels, thick sloped armour plates with welding seams'),
+  unit('battlecruiser', 'Chasseur de chars', 'a turretless tank destroyer with a low sloped casemate and a very long gun, spare track links bolted to the hull'),
+  unit('bomber', 'Bombardier', 'a four-engine heavy bomber parked on a round concrete hardstand, straight wings, glazed nose, propellers at rest'),
+  unit('destroyer', 'Obusier', 'a towed field howitzer with large spoked steel wheels, a gun shield and the barrel raised at about 35 degrees, split trails dug into the ground'),
+  unit('deathstar', 'Canon sur voie ferrée', 'a super-heavy railway gun on a long multi-axle rail carriage standing on a short length of track, enormous barrel raised'),
+  unit('smallCargo', 'Camion', 'a military cargo truck with a canvas-covered rear bed, three axles and mud-spattered wheels'),
+  unit('largeCargo', 'Half-track', 'an armoured half-track carrier with front wheels and rear tracks, an open-topped troop compartment and a pintle-mounted machine gun'),
+  unit('recycler', 'Dépanneuse', 'a heavy recovery truck with an A-frame crane, winch cable and hook at the rear, chains and tools on its bed'),
+  unit('espionageProbe', 'Tireur d’élite', 'a sniper lying prone under a camouflage cape with leaf scrim, a long rifle with a telescopic sight on a small bipod'),
+  unit('colonyShip', 'Campement du génie', 'an engineers field camp: a canvas ridge tent with guy ropes, stacked supply crates, shovels and a coil of wire'),
+  unit('solarSatellite', 'Groupe électrogène', 'a two-wheeled towed portable electric generator with a small exhaust stack and cables coiled on top'),
 
-  defense('rocketLauncher', 'Lance-roquettes', 'a towed multiple rocket launcher with three rows of launch tubes angled upward, rockets loaded', P.rocketLauncher),
-  defense('lightLaser', 'Nid de mitrailleuse', 'a machine-gun nest behind a curved wall of sandbags, the gun barrel pointing forward through a gap, ammunition belts', P.machineGunNest),
-  defense('heavyLaser', 'Canon antichar', 'a low towed anti-tank gun with a wide angled gun shield and a long horizontal barrel, its trails spread', P.antiTankGun),
-  defense('gaussCannon', 'Canon de campagne', 'a towed field gun with a gun shield, large spoked wheels and the barrel slightly raised', P.fieldGun),
-  defense('ionCannon', 'Canon antiaérien', 'a twin-barrel anti-aircraft gun on a cruciform platform, barrels pointing steeply up, ready ammunition clips beside it', P.antiAirGun),
-  defense('plasmaTurret', 'Casemate', 'a heavy concrete coastal casemate half-buried in earth, a large gun barrel protruding from its embrasure', P.casemate),
-  defense('smallShieldDome', 'Sacs de sable', 'a low curved wall of neatly stacked sandbags, a few of them torn and leaking sand', P.sandbagWall),
-  defense('largeShieldDome', 'Bunker', 'a domed concrete bunker partly covered with earth and grass, with a narrow dark firing slit', P.bunker),
-  defense('antiBallisticMissile', 'Missile d’interception', 'a small interceptor missile with short fins on an angled launch rail', P.interceptor),
-  defense('interplanetaryMissile', 'Fusée', 'a large finned rocket standing upright on a launch table beside a steel service gantry, a thin dark red band near the nose', P.rocket),
+  defense('rocketLauncher', 'Lance-roquettes', 'a towed multiple rocket launcher with three rows of launch tubes angled upward, rockets loaded'),
+  defense('lightLaser', 'Nid de mitrailleuse', 'a machine-gun nest behind a curved wall of sandbags, the gun barrel pointing forward through a gap, ammunition belts'),
+  defense('heavyLaser', 'Canon antichar', 'a low towed anti-tank gun with a wide angled gun shield and a long horizontal barrel, its trails spread'),
+  defense('gaussCannon', 'Canon de campagne', 'a towed field gun with a gun shield, large spoked wheels and the barrel slightly raised'),
+  defense('ionCannon', 'Canon antiaérien', 'a twin-barrel anti-aircraft gun on a cruciform platform, barrels pointing steeply up, ready ammunition clips beside it'),
+  defense('plasmaTurret', 'Casemate', 'a heavy concrete coastal casemate half-buried in earth, a large gun barrel protruding from its embrasure'),
+  defense('smallShieldDome', 'Sacs de sable', 'a low curved wall of neatly stacked sandbags, a few of them torn and leaking sand'),
+  defense('largeShieldDome', 'Bunker', 'a domed concrete bunker partly covered with earth and grass, with a narrow dark firing slit'),
+  defense('antiBallisticMissile', 'Missile d’interception', 'a small interceptor missile with short fins on an angled launch rail'),
+  defense('interplanetaryMissile', 'Fusée', 'a large finned rocket standing upright on a launch table beside a steel service gantry, a thin dark red band near the nose'),
 
-  resource('metal', 'Acier', 'a neat stack of three heavy steel ingots with a dull metallic sheen', P.steel, 'Métal'),
-  resource('crystal', 'Munitions', 'three brass artillery shells standing side by side, the middle one taller', P.munitions, 'Cristal'),
-  resource('deuterium', 'Carburant', 'a military steel jerrycan with an embossed X pattern on its side and a triple handle', P.fuel, 'Deutérium'),
-  resource('energy', 'Énergie', 'an enamelled metal high-voltage warning plate showing one bold lightning bolt and no lettering', P.energy, 'Énergie'),
+  resource('metal', 'Acier', 'a neat stack of three heavy steel ingots with a dull metallic sheen', 'Métal'),
+  resource('crystal', 'Munitions', 'three brass artillery shells standing side by side, the middle one taller', 'Cristal'),
+  resource('deuterium', 'Carburant', 'a military steel jerrycan with an embossed X pattern on its side and a triple handle', 'Deutérium'),
+  resource('energy', 'Énergie', 'an enamelled metal high-voltage warning plate showing one bold lightning bolt and no lettering', 'Énergie'),
 
-  building('metalMine', 'Mine de fer', 'an iron mine head: a steel lattice headframe with its winding wheel, a spoil heap and a mine cart full of ore on rails', P.mineHead),
-  building('crystalMine', 'Usine de munitions', 'an ammunition factory: a brick workshop with a sawtooth roof and a chimney, artillery shells and crates stacked in front', P.ammoWorks),
-  building('deuteriumSynth', 'Raffinerie', 'a fuel refinery: two tall distillation columns, a tangle of pipes and a cylindrical storage tank', P.refinery),
-  building('solarPlant', 'Centrale thermique', 'a coal-fired power station with two smoking chimneys, a coal heap and a high-voltage lattice pylon', P.powerStation),
-  building('fusionReactor', 'Barrage hydroélectrique', 'a concrete hydroelectric dam with water rushing from its spillways and a turbine house at its foot', P.dam),
-  building('metalStorage', 'Dépôt d’acier', 'a semicircular corrugated-steel hut with stacks of steel girders and plates in front', P.steelDepot),
-  building('crystalStorage', 'Dépôt de munitions', 'an earth-covered ammunition bunker with a heavy steel door, crates and shells stacked at the entrance', P.ammoDepot),
-  building('deuteriumTank', 'Dépôt de carburant', 'a fuel depot with two large cylindrical tanks, pipes and rows of fuel drums', P.fuelDepot),
-  building('roboticsFactory', 'Usine', 'a large brick factory with a sawtooth roof and a tall chimney', P.factory),
-  building('shipyard', 'Usine de blindés', 'a tank assembly hall with a large open door, a new tank rolling out and an overhead gantry crane', P.tankWorks),
-  building('researchLab', 'Bureau d’études', 'a brick research building with a tall radio mast, antenna wires and a few lit windows', P.laboratory),
-  building('naniteFactory', 'Arsenal', 'a large arsenal complex: several workshops with chimneys, a railway siding and gun barrels on racks', P.arsenal),
-  building('terraformer', 'Génie', 'a tracked bulldozer pushing a mound of earth, its blade dented', P.bulldozer),
-  building('missileSilo', 'Base de lancement', 'a rocket launch site: a rocket on an angled erector, a concrete pad and a small blockhouse', P.launchSite),
-  building('lunarBase', 'Avant-poste', 'a fortified forward outpost on a small hill: a wooden watchtower, sandbags, barbed wire and a tent', P.outpost),
-  building('sensorPhalanx', 'Station radar', 'a radar station: a large rectangular mesh antenna on a lattice tower and a control hut with cables', P.radarStation),
-  building('jumpGate', 'Aérodrome', 'a military airfield: a hangar, a small control tower, a stretch of unmarked runway and a windsock', P.airfield),
+  building('metalMine', 'Mine de fer', 'an iron mine head: a steel lattice headframe with its winding wheel, a spoil heap and a mine cart full of ore on rails'),
+  building('crystalMine', 'Usine de munitions', 'an ammunition factory: a brick workshop with a sawtooth roof and a chimney, artillery shells and crates stacked in front'),
+  building('deuteriumSynth', 'Raffinerie', 'a fuel refinery: two tall distillation columns, a tangle of pipes and a cylindrical storage tank'),
+  building('solarPlant', 'Centrale thermique', 'a coal-fired power station with two smoking chimneys, a coal heap and a high-voltage lattice pylon'),
+  building('fusionReactor', 'Barrage hydroélectrique', 'a concrete hydroelectric dam with water rushing from its spillways and a turbine house at its foot'),
+  building('metalStorage', 'Dépôt d’acier', 'a semicircular corrugated-steel hut with stacks of steel girders and plates in front'),
+  building('crystalStorage', 'Dépôt de munitions', 'an earth-covered ammunition bunker with a heavy steel door, crates and shells stacked at the entrance'),
+  building('deuteriumTank', 'Dépôt de carburant', 'a fuel depot with two large cylindrical tanks, pipes and rows of fuel drums'),
+  building('roboticsFactory', 'Usine', 'a large brick factory with a sawtooth roof and a tall chimney'),
+  building('shipyard', 'Usine de blindés', 'a tank assembly hall with a large open door, a new tank rolling out and an overhead gantry crane'),
+  building('researchLab', 'Bureau d’études', 'a brick research building with a tall radio mast, antenna wires and a few lit windows'),
+  building('naniteFactory', 'Arsenal', 'a large arsenal complex: several workshops with chimneys, a railway siding and gun barrels on racks'),
+  building('terraformer', 'Génie', 'a tracked bulldozer pushing a mound of earth, its blade dented'),
+  building('missileSilo', 'Base de lancement', 'a rocket launch site: a rocket on an angled erector, a concrete pad and a small blockhouse'),
+  building('lunarBase', 'Avant-poste', 'a fortified forward outpost on a small hill: a wooden watchtower, sandbags, barbed wire and a tent'),
+  building('sensorPhalanx', 'Station radar', 'a radar station: a large rectangular mesh antenna on a lattice tower and a control hut with cables'),
+  building('jumpGate', 'Aérodrome', 'a military airfield: a hangar, a small control tower, a stretch of unmarked runway and a windsock'),
 
-  research('energyTech', 'Électrification', 'an electrical transformer with three tall porcelain insulators and heavy cables', P.transformer),
-  research('laserTech', 'Optique', 'an anti-aircraft searchlight on its trailer, its powerful beam projecting into the darkness', P.searchlight),
-  research('ionTech', 'Radio', 'a large glass radio transmitting valve with visible electrodes and a faint warm filament glow, mounted on a radio chassis', P.radioTube),
-  research('hyperspaceTech', 'Cartographie', 'a folded topographic map without any lettering, a route drawn in pencil, brass drafting dividers and a compass lying on it', P.mapAndDividers),
-  research('plasmaTech', 'Métallurgie', 'a foundry crucible pouring molten metal into a sand mould, a few sparks and a dim orange glow', P.crucible),
-  research('combustionDrive', 'Moteur à explosion', 'an oily, well-used six-cylinder truck engine on an engine stand', P.engineBlock),
-  research('impulseDrive', 'Moteur d’avion', 'a radial aircraft engine with a three-blade propeller on an engine stand', P.radialEngine),
-  research('hyperspaceDrive', 'Moteur-fusée', 'an early liquid-fuel rocket engine on a test stand: combustion chamber, nozzle bell, pipes and a short flame', P.rocketEngine),
-  research('espionageTech', 'Renseignement', 'a pair of military binoculars on a worn leather case, beside a blank folded document', P.binoculars),
-  research('computerTech', 'Chiffrement', 'a generic electromechanical cipher machine in an open wooden case: three rotors, a keyboard with blank keys and small lamps', P.cipherMachine),
-  research('astrophysics', 'Observation', 'an artillery scissors periscope (twin observation telescope) on a tripod', P.telescope),
-  research('researchNetwork', 'Réseau de transmissions', 'a field telephone in its leather case with the handset, next to a cable reel on its frame', P.fieldTelephone),
-  research('gravitonTech', 'Balistique', 'a sectioned artillery shell lying on graph paper with a hand-drawn trajectory arc, a brass gunner’s quadrant beside it', P.ballistics),
-  research('weaponsTech', 'Armement', 'two bolt-action rifles crossed in front of an open wooden ammunition crate full of cartridges', P.crossedRifles),
-  research('shieldingTech', 'Camouflage', 'a small military vehicle almost hidden under a camouflage net with leaf-shaped scrim', P.camouflageNet),
-  research('armourTech', 'Blindage', 'a thick riveted armour test plate on a stand, with a deep shell impact crater and cracks', P.armourPlates),
+  research('energyTech', 'Électrification', 'an electrical transformer with three tall porcelain insulators and heavy cables'),
+  research('laserTech', 'Optique', 'an anti-aircraft searchlight on its trailer, its powerful beam projecting into the darkness'),
+  research('ionTech', 'Radio', 'a large glass radio transmitting valve with visible electrodes and a faint warm filament glow, mounted on a radio chassis'),
+  research('hyperspaceTech', 'Cartographie', 'a folded topographic map without any lettering, a route drawn in pencil, brass drafting dividers and a compass lying on it'),
+  research('plasmaTech', 'Métallurgie', 'a foundry crucible pouring molten metal into a sand mould, a few sparks and a dim orange glow'),
+  research('combustionDrive', 'Moteur à explosion', 'an oily, well-used six-cylinder truck engine on an engine stand'),
+  research('impulseDrive', 'Moteur d’avion', 'a radial aircraft engine with a three-blade propeller on an engine stand'),
+  research('hyperspaceDrive', 'Moteur-fusée', 'an early liquid-fuel rocket engine on a test stand: combustion chamber, nozzle bell, pipes and a short flame'),
+  research('espionageTech', 'Renseignement', 'a pair of military binoculars on a worn leather case, beside a blank folded document'),
+  research('computerTech', 'Chiffrement', 'a generic electromechanical cipher machine in an open wooden case: three rotors, a keyboard with blank keys and small lamps'),
+  research('astrophysics', 'Observation', 'an artillery scissors periscope (twin observation telescope) on a tripod'),
+  research('researchNetwork', 'Réseau de transmissions', 'a field telephone in its leather case with the handset, next to a cable reel on its frame'),
+  research('gravitonTech', 'Balistique', 'a sectioned artillery shell lying on graph paper with a hand-drawn trajectory arc, a brass gunner’s quadrant beside it'),
+  research('weaponsTech', 'Armement', 'two bolt-action rifles crossed in front of an open wooden ammunition crate full of cartridges'),
+  research('shieldingTech', 'Camouflage', 'a small military vehicle almost hidden under a camouflage net with leaf-shaped scrim'),
+  research('armourTech', 'Blindage', 'a thick riveted armour test plate on a stand, with a deep shell impact crater and cracks'),
 ];
 
 /** Cadrage demandé au générateur, par famille. */

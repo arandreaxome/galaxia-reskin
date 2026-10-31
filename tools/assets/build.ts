@@ -1,52 +1,35 @@
 // Génère le pack à partir du catalogue (pack.ts) :
-//  - assets/skin/<clé>.svg et png/<clé>.png : les dessins, et leur rendu PNG ;
-//  - assets/skin/prompts.md et prompts.csv : les prompts des images réalistes, pour Gemini (un Gem porte le style) ;
+//  - assets/skin/nav-<page>.svg : les icônes du menu ;
+//  - assets/skin/prompts.md et prompts.csv : les prompts des images, pour Gemini (un Gem porte le style) ;
 //  - public/skin-assets.css : les règles qui remplacent les images du jeu quand le réglage « pack d'assets »
 //    est actif (classe html.radar-assets, posée par content.js).
-// Une image déposée dans assets/skin/generated/<clé>.(png|webp|jpg) remplace le dessin de cette clé.
+// Les images sont déposées dans public/skin/<clé>.(png|webp|jpg|jpeg), que Vite copie telles quelles dans
+// l'extension ; une clé sans image garde celle du jeu.
 // Usage : npm run assets [-- --preview <dossier>] pour écrire aussi une planche de contrôle.
 
-import { copyFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
-import { Resvg } from '@resvg/resvg-js';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { ASSETS, GEM, NAV, VIEWS, type Asset } from './pack.ts';
 
 const root = new URL('../../', import.meta.url);
 const skin = new URL('assets/skin/', root);
-const png = new URL('png/', skin);
-const generated = new URL('generated/', skin);
 const served = new URL('public/skin/', root);
-for (const dir of [skin, png, generated]) mkdirSync(dir, { recursive: true });
-rmSync(served, { recursive: true, force: true });
+mkdirSync(skin, { recursive: true });
 
 const dataUri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 
-// Dessins et rendus de référence
-for (const asset of ASSETS) {
-  writeFileSync(new URL(`${asset.key}.svg`, skin), asset.svg);
-  const render = new Resvg(asset.svg, { fitTo: { mode: 'width', value: 512 }, background: 'rgba(0,0,0,0)' }).render();
-  writeFileSync(new URL(`${asset.key}.png`, png), render.asPng());
-}
 for (const nav of NAV) writeFileSync(new URL(`nav-${nav.route || 'planet'}.svg`, skin), nav.svg);
 
-/** Image générée déposée pour cette clé, copiée dans l'extension. */
-function generatedImage(key: string): string | null {
-  for (const ext of ['png', 'webp', 'jpg', 'jpeg']) {
-    if (!existsSync(new URL(`${key}.${ext}`, generated))) continue;
-    mkdirSync(served, { recursive: true });
-    copyFileSync(new URL(`${key}.${ext}`, generated), new URL(`${key}.${ext}`, served));
-    // Chrome remplace __MSG_@@extension_id__ dans les feuilles injectées par les scripts de contenu.
-    return `url("chrome-extension://__MSG_@@extension_id__/skin/${key}.${ext}")`;
-  }
-  return null;
-}
+/** Image déposée pour cette clé dans public/skin/. */
+const imageFile = (key: string) => ['png', 'webp', 'jpg', 'jpeg'].map(ext => new URL(`${key}.${ext}`, served)).find(file => existsSync(file));
 
 // Images du jeu : remplacées par `content` (sans toucher au DOM), hors du filtre de désaturation de skin.css.
-let replaced = 0;
-const images = ASSETS.map(asset => {
+// Chrome remplace __MSG_@@extension_id__ dans les feuilles injectées par les scripts de contenu.
+const images = ASSETS.flatMap(asset => {
+  const file = imageFile(asset.key);
+  if (!file) return [];
   const selectors = [`img[src*="/assets/${asset.key}-"]`, ...(asset.alt ? [`img[alt="${asset.alt}"]`] : [])];
-  const image = generatedImage(asset.key);
-  if (image) replaced++;
-  return `html.radar-assets :is(${selectors.join(', ')}) {\n  content: ${image ?? dataUri(asset.svg)};\n  filter: none !important;\n}`;
+  const url = `chrome-extension://__MSG_@@extension_id__/skin/${file.pathname.split('/').pop()}`;
+  return [`html.radar-assets :is(${selectors.join(', ')}) {\n  content: url("${url}");\n  filter: none !important;\n}`];
 });
 
 // Icônes du menu : l'icône du jeu est masquée par la nôtre, peinte avec la couleur du texte.
@@ -72,8 +55,8 @@ const promptsMd = [
   '',
   '1. Dans Gemini, créer un Gem (Explorer les Gems › Nouveau Gem), par exemple « Galaxia Radar · Arsenal 1940 », et coller les instructions ci-dessous.',
   '2. Dans une conversation avec ce Gem, envoyer un prompt par message : une image par élément. Une conversation par famille garde la série homogène ; une image qui s’écarte du style se régénère.',
-  '3. Enregistrer chaque image sous `assets/skin/generated/<clé>.png` (clé entre parenthèses au début du prompt ; `.jpg` et `.webp` sont acceptés).',
-  '4. Lancer `npm run assets && npm run build`, puis recharger l’extension (↻ dans `chrome://extensions`) et l’onglet du jeu. Les clés sans image gardent leur dessin.',
+  '3. Enregistrer chaque image sous `public/skin/<clé>.jpeg` (clé entre parenthèses au début du prompt ; `.png`, `.jpg` et `.webp` sont acceptés).',
+  '4. Lancer `npm run assets && npm run build`, puis recharger l’extension (↻ dans `chrome://extensions`) et l’onglet du jeu. Les clés sans image gardent celle du jeu.',
   '',
   '## Instructions du Gem',
   '',
@@ -94,11 +77,11 @@ writeFileSync(new URL('prompts.md', skin), promptsMd);
 const csvCell = (value: string) => `"${value.replace(/"/g, '""')}"`;
 const csv = [
   ['key', 'name', 'group', 'file', 'prompt'].join(','),
-  ...ASSETS.map(a => [a.key, a.name, a.group, `generated/${a.key}.png`, prompt(a)].map(csvCell).join(',')),
+  ...ASSETS.map(a => [a.key, a.name, a.group, `public/skin/${a.key}.jpeg`, prompt(a)].map(csvCell).join(',')),
 ].join('\n');
 writeFileSync(new URL('prompts.csv', skin), csv + '\n');
 
-console.log(`${ASSETS.length} dessins, ${NAV.length} icônes de menu, ${replaced} image(s) générée(s) utilisée(s)`);
+console.log(`${images.length} image(s) sur ${ASSETS.length}, ${NAV.length} icônes de menu`);
 
 // Planche de contrôle, hors du projet.
 const at = process.argv.indexOf('--preview');
@@ -108,7 +91,10 @@ if (at > 0) {
   const card = (body: string, name: string, key: string) =>
     `<figure>${body}<figcaption><b>${name}</b><small>${key}</small></figcaption></figure>`;
   const sections = groups.map(group => {
-    const cards = ASSETS.filter(a => a.group === group).map(a => card(`<div class="big">${a.svg}</div><div class="small">${a.svg}</div>`, a.name, a.key));
+    const cards = ASSETS.filter(a => a.group === group).map(a => {
+      const file = imageFile(a.key);
+      return card(file ? `<img class="big" src="${file.href}"><img class="small" src="${file.href}">` : '<span class="none">sans image</span>', a.name, a.key);
+    });
     return `<h2>${group}</h2><section>${cards.join('')}</section>`;
   });
   const icons = NAV.map(n => card(`<div class="nav" style='--m:${dataUri(n.svg)}'></div>`, n.name, `#/${n.route}`));
@@ -119,7 +105,7 @@ if (at > 0) {
       h2{margin:18px 0 8px;font-size:13px;letter-spacing:.1em;text-transform:uppercase}
       section{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
       figure{margin:0;padding:10px;background:#2c2c2c;border:1px solid #3a4a3a;border-radius:2px;display:grid;gap:6px;justify-items:center}
-      .big svg{width:128px;height:128px;display:block}.small svg{width:32px;height:32px;display:block}
+      .big{width:128px;height:128px;display:block}.small{width:32px;height:32px;display:block}.none{height:128px;display:grid;place-items:center;color:#b4503f}
       .nav{width:40px;height:40px;background:#e8e4d9;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat}
       figcaption{display:grid;text-align:center}small{color:rgb(232 228 217/62%)}
     </style>${sections.join('')}<h2>Menu</h2><section>${icons.join('')}</section>`,

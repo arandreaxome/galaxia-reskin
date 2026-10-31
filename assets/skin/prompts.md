@@ -8,8 +8,8 @@ Images réalistes façon photo d’archives de la Seconde Guerre mondiale, aux n
 
 1. Dans Gemini, créer un Gem (Explorer les Gems › Nouveau Gem), par exemple « Galaxia Radar · Arsenal 1940 », et coller les instructions ci-dessous.
 2. Dans une conversation avec ce Gem, envoyer un prompt par message : une image par élément. Une conversation par famille garde la série homogène ; une image qui s’écarte du style se régénère.
-3. Enregistrer chaque image sous `assets/skin/generated/<clé>.png` (clé entre parenthèses au début du prompt ; `.jpg` et `.webp` sont acceptés).
-4. Lancer `npm run assets && npm run build`, puis recharger l’extension (↻ dans `chrome://extensions`) et l’onglet du jeu. Les clés sans image gardent leur dessin.
+3. Enregistrer chaque image sous `public/skin/<clé>.jpeg` (clé entre parenthèses au début du prompt ; `.png`, `.jpg` et `.webp` sont acceptés).
+4. Lancer `npm run assets && npm run build`, puis recharger l’extension (↻ dans `chrome://extensions`) et l’onglet du jeu. Les clés sans image gardent celle du jeu.
 
 ## Instructions du Gem
 
