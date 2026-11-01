@@ -18,8 +18,11 @@ export function SettingsView({ settings = {} }: { settings?: Settings }) {
         <label className="setting">
           <input type="checkbox" checked={Boolean(settings.skin)} onChange={e => update({ skin: e.target.checked })} />
           <span>
-            <b>Habiller le site du jeu aux couleurs de l’extension</b>
-            <span className="muted">Mêmes couleurs et même police, décors retirés, images désaturées.</span>
+            <b>Habiller le site et l’extension en thème militaire</b>
+            <span className="muted">
+              Mêmes couleurs et même police sur le site du jeu et dans la popup, décors retirés, images désaturées. Décoché, l’extension prend les
+              couleurs du site.
+            </span>
           </span>
         </label>
         <label className="setting">

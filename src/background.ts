@@ -11,8 +11,11 @@ import type { GalaxySystem, GameState, Message, NotifCategory, Scan, Settings, S
 const GAME = 'https://galaxia.eldau.xyz/';
 const API = `${GAME}api`;
 const ICON = 'icons/icon-128.png';
-// Badge de l'icône, dans la palette du thème (src/popup/popup.css).
-const BADGE = { idle: '#2c2c2c', alert: '#4a5d4a', danger: '#6b1e1e', text: '#e8e4d9' };
+// Badge de l'icône aux couleurs du thème de la popup (src/popup/popup.css) : [fond, texte].
+const BADGE = {
+  site: { idle: ['#161628', '#e6e4f7'], alert: ['#6152e8', '#e6e4f7'], danger: ['#ff7083', '#04040a'] },
+  radar: { idle: ['#2c2c2c', '#e8e4d9'], alert: ['#4a5d4a', '#e8e4d9'], danger: ['#6b1e1e', '#e8e4d9'] },
+} as const;
 
 type Stored = {
   token?: string | null;
@@ -107,17 +110,20 @@ async function poll() {
 }
 
 async function updateBadge() {
-  const { snapshot, status } = await read();
-  await chrome.action.setBadgeTextColor({ color: BADGE.text });
+  const { snapshot, status, settings } = await read();
+  const badge = BADGE[settings?.skin ? 'radar' : 'site'];
+  const paint = async ([background, text]: readonly [string, string]) => {
+    await chrome.action.setBadgeBackgroundColor({ color: background });
+    await chrome.action.setBadgeTextColor({ color: text });
+  };
   if (!snapshot || status === 'no-token' || status === 'expired') {
-    await chrome.action.setBadgeBackgroundColor({ color: BADGE.idle });
+    await paint(badge.idle);
     await chrome.action.setBadgeText({ text: '?' });
     await chrome.action.setTitle({ title: 'Galaxia Radar : ouvre le jeu pour connecter l’extension' });
     return;
   }
   const list = alerts(snapshot.state, Date.now() + snapshot.offset);
-  const color = status === 'offline' ? BADGE.idle : list.some(a => a.level === 'danger') ? BADGE.danger : BADGE.alert;
-  await chrome.action.setBadgeBackgroundColor({ color });
+  await paint(status === 'offline' ? badge.idle : list.some(a => a.level === 'danger') ? badge.danger : badge.alert);
   await chrome.action.setBadgeText({ text: list.length ? String(list.length) : '' });
   await chrome.action.setTitle({ title: list.length ? list.map(a => a.text).join('\n') : 'Galaxia Radar : rien en attente' });
 }
@@ -280,6 +286,11 @@ chrome.notifications.onClicked.addListener(id => {
   void chrome.notifications.clear(id);
   const [route, planet] = id.split('|');
   void openGame(route, planet || undefined);
+});
+
+// Le badge suit le thème de la popup quand le réglage d'habillage change.
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && changes.settings) void updateBadge();
 });
 
 chrome.alarms.onAlarm.addListener(() => void refresh(true));

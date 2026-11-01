@@ -1,12 +1,44 @@
 /* ==========================================================================
-   Thème « état-major » : austère, utilitaire, surfaces mates.
-   Toutes les teintes viennent des sept couleurs de la palette ; les nuances
-   (textes secondaires) sont obtenues par opacité, jamais par une autre teinte.
+   Deux thèmes, choisis par le réglage d'habillage (main.tsx pose data-theme sur html) :
+   - par défaut, les couleurs du site du jeu, reprises de ses variables CSS ;
+   - « état-major » (data-theme="radar") quand le site est habillé : austère, utilitaire, surfaces
+     mates, sept couleurs ; les nuances (textes secondaires) viennent de l'opacité, jamais d'une
+     autre teinte.
+   Les règles n'emploient que les rôles : ajuster ici plutôt que dans les règles.
    ========================================================================== */
 
 :root {
   color-scheme: dark;
 
+  /* Couleurs du site (galaxia.eldau.xyz) ; entre parenthèses, sa variable d'origine */
+  --bg: #04040a; /* fond de la popup (--bg) */
+  --surface: #0a0a15; /* cartes, boutons, champs (--surface) */
+  --surface-hover: #161628; /* survol (--surface-3) */
+  --selected: rgb(139 124 255 / 13%); /* élément sélectionné : onglet de filtre, puce (--accent-soft) */
+  --accent: #6152e8; /* actif, appuyé (--accent-fill) */
+  --fill: #6152e8; /* pastille pleine (--accent-fill) */
+  --fill-soft: #161628; /* pastille discrète (--surface-3) */
+  --highlight: #8b7cff; /* bordure ou soulignement actif (--accent) */
+  --danger: rgb(255 80 100 / 14%); /* fond d'alerte (--danger-soft) */
+  --danger-line: #ff7083; /* témoin et bordure d'alerte (--bad) */
+  --on-danger: #ff7083; /* texte sur fond d'alerte (--bad) */
+  --line: rgb(150 140 255 / 10%); /* séparateurs (--line) */
+  --line-strong: rgb(150 140 255 / 20%); /* bordures de contrôles (--line-2) */
+  --text: #e6e4f7; /* texte principal (--text) */
+  --text-2: #84829f; /* texte secondaire (--muted) */
+  --focus: #b0a6ff; /* contour clavier (--accent-2) */
+
+  --radius: 10px;
+  --radius-card: 14px;
+  --radius-small: 6px;
+  --font: 'Exo 2', system-ui, sans-serif; /* polices du site, chargées par main.tsx */
+  --font-brand: Orbitron, var(--font);
+  --size: 13px;
+  --size-small: 11.5px;
+  --size-label: 10.5px;
+}
+
+:root[data-theme='radar'] {
   /* Palette */
   --c-field: #4a5d4a; /* gris-vert militaire mat */
   --c-field-light: #5c6b5c; /* gris-vert clair */
@@ -16,23 +48,29 @@
   --c-ivory: #e8e4d9; /* blanc cassé, ivoire */
   --c-red: #6b1e1e; /* rouge sombre : états actifs et alertes uniquement */
 
-  /* Rôles : ajuster ici plutôt que dans les règles */
-  --bg: var(--c-black); /* fond de la popup */
-  --surface: var(--c-anthracite); /* cartes, boutons, champs */
-  --surface-hover: var(--c-olive); /* survol */
-  --selected: var(--c-field); /* élément sélectionné (onglet de filtre, puce) */
-  --accent: var(--c-red); /* actif, appuyé, alerte */
-  --line: var(--c-olive); /* séparateurs */
-  --line-strong: var(--c-field); /* bordures de contrôles */
-  --text: var(--c-ivory); /* texte principal */
-  --text-2: rgb(232 228 217 / 62%); /* texte secondaire : ivoire atténué */
-  --focus: var(--c-ivory); /* contour clavier */
+  /* Rôles */
+  --bg: var(--c-black);
+  --surface: var(--c-anthracite);
+  --surface-hover: var(--c-olive);
+  --selected: var(--c-field);
+  --accent: var(--c-red);
+  --fill: var(--c-field);
+  --fill-soft: var(--c-olive);
+  --highlight: var(--c-field-light);
+  --danger: var(--c-red);
+  --danger-line: var(--c-red);
+  --on-danger: var(--c-ivory);
+  --line: var(--c-olive);
+  --line-strong: var(--c-field);
+  --text: var(--c-ivory);
+  --text-2: rgb(232 228 217 / 62%); /* ivoire atténué */
+  --focus: var(--c-ivory);
 
   --radius: 2px;
+  --radius-card: 2px;
+  --radius-small: 2px;
   --font: 'Avenir Next Condensed', 'Bahnschrift SemiCondensed', Bahnschrift, 'Roboto Condensed', 'Arial Narrow', system-ui, sans-serif;
-  --size: 13px;
-  --size-small: 11.5px;
-  --size-label: 10.5px;
+  --font-brand: var(--font);
 }
 
 /* --------------------------------------------------------------------------
@@ -65,7 +103,7 @@ body {
 }
 
 ::selection {
-  color: var(--c-ivory);
+  color: var(--text);
   background: var(--selected);
 }
 
@@ -84,6 +122,7 @@ h2 {
 }
 
 h1 {
+  font-family: var(--font-brand);
   font-size: 15px;
 }
 
@@ -122,7 +161,7 @@ p {
   height: 6px;
   margin-right: 6px;
   vertical-align: 1px;
-  background: var(--accent);
+  background: var(--danger-line);
 }
 
 /* Ouverte en grand dans un onglet : la page défile normalement. */
@@ -189,22 +228,23 @@ header b {
 .badge {
   margin-left: 6px;
   padding: 0 5px;
-  color: var(--c-ivory);
+  color: var(--text);
   font-size: var(--size-label);
   font-weight: 700;
   letter-spacing: 0.04em;
-  background: var(--c-field);
-  border-radius: var(--radius);
+  background: var(--fill);
+  border-radius: var(--radius-small);
 }
 
 .badge.ok {
-  background: var(--c-olive);
-  outline: 1px solid var(--c-field-light);
+  background: var(--fill-soft);
+  outline: 1px solid var(--highlight);
   outline-offset: -1px;
 }
 
 .badge.danger {
-  background: var(--accent);
+  color: var(--on-danger);
+  background: var(--danger);
 }
 
 /* --------------------------------------------------------------------------
@@ -227,7 +267,7 @@ button {
 
 button:hover {
   background: var(--surface-hover);
-  border-color: var(--c-field-light);
+  border-color: var(--highlight);
 }
 
 button:active {
@@ -250,7 +290,7 @@ a,
 button.link {
   color: var(--text);
   text-decoration: underline;
-  text-decoration-color: var(--c-field-light);
+  text-decoration-color: var(--highlight);
   text-underline-offset: 2px;
   cursor: pointer;
 }
@@ -266,7 +306,7 @@ button.link {
 
 a:hover,
 button.link:hover {
-  text-decoration-color: var(--c-ivory);
+  text-decoration-color: var(--text);
   background: none;
 }
 
@@ -283,7 +323,7 @@ footer {
   padding: 9px 11px;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--radius-card);
 }
 
 table {
@@ -330,7 +370,7 @@ td.num {
   padding: 5px 8px;
   background: var(--bg);
   border: 1px solid var(--line);
-  border-left: 3px solid var(--c-field-light);
+  border-left: 3px solid var(--highlight);
   border-radius: var(--radius);
   cursor: pointer;
 }
@@ -341,8 +381,9 @@ td.num {
 
 .alerts li.danger {
   font-weight: 700;
-  background: var(--accent);
-  border-color: var(--accent);
+  color: var(--on-danger);
+  background: var(--danger);
+  border-color: var(--danger-line);
 }
 
 /* --------------------------------------------------------------------------
@@ -363,13 +404,13 @@ h2 + .fleet {
 .fleet .tag {
   margin-right: 6px;
   padding: 0 4px;
-  color: var(--c-ivory);
+  color: var(--text);
   font-size: var(--size-label);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: var(--c-olive);
-  border-radius: var(--radius);
+  background: var(--fill-soft);
+  border-radius: var(--radius-small);
 }
 
 .fleet.hostile {
@@ -377,7 +418,8 @@ h2 + .fleet {
 }
 
 .fleet.hostile .tag {
-  background: var(--accent);
+  color: var(--on-danger);
+  background: var(--danger);
 }
 
 .fleet .when {
@@ -439,7 +481,7 @@ h2 + .fleet {
 }
 
 .seg button.active {
-  color: var(--c-ivory);
+  color: var(--text);
   background: var(--selected);
 }
 
@@ -459,9 +501,9 @@ h2 + .fleet {
 }
 
 .chip.active {
-  color: var(--c-ivory);
+  color: var(--text);
   background: var(--selected);
-  border-color: var(--c-field-light);
+  border-color: var(--highlight);
 }
 
 .chip small {
@@ -579,14 +621,14 @@ select {
 .lvl {
   min-width: 26px;
   padding: 0 4px;
-  color: var(--c-ivory);
+  color: var(--text);
   font-size: var(--size-label);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-align: center;
-  background: var(--c-olive);
-  border: 1px solid var(--c-field);
-  border-radius: var(--radius);
+  background: var(--fill-soft);
+  border: 1px solid var(--fill);
+  border-radius: var(--radius-small);
 }
 
 .name {
@@ -604,12 +646,12 @@ select {
   text-transform: uppercase;
   white-space: nowrap;
   border: 1px solid transparent;
-  border-radius: var(--radius);
+  border-radius: var(--radius-small);
 }
 
 .pill.ready {
-  color: var(--c-ivory);
-  background: var(--c-field);
+  color: var(--text);
+  background: var(--fill);
 }
 
 .pill.protected {
@@ -619,8 +661,8 @@ select {
 }
 
 .pill.respy {
-  color: var(--c-ivory);
-  background: var(--accent);
+  color: var(--on-danger);
+  background: var(--danger);
 }
 
 .pill.unprobed {
@@ -713,17 +755,17 @@ input[type='checkbox'] {
   margin: 1px 0 0;
   background: var(--bg);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius);
+  border-radius: var(--radius-small);
   cursor: pointer;
 }
 
 input[type='checkbox']:hover {
-  border-color: var(--c-field-light);
+  border-color: var(--highlight);
 }
 
 input[type='checkbox']:checked {
   background: var(--selected);
-  border-color: var(--c-field-light);
+  border-color: var(--highlight);
 }
 
 /* Coche ivoire, dessinée par deux bordures tournées. */
@@ -733,7 +775,7 @@ input[type='checkbox']:checked::after {
   width: 4px;
   height: 8px;
   margin: 2px auto 0;
-  border: solid var(--c-ivory);
+  border: solid var(--text);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
