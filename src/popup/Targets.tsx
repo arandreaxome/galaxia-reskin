@@ -10,9 +10,10 @@ import { bestOrigin, byDistance, OriginPicker } from './Origin';
 import { ScanButton, ScanPanel, scanSummary, useScan, viewCost } from './Scan';
 
 type Sort = 'coords' | 'proximity' | 'loot' | 'profit' | 'protection';
-type Filters = { kind: 'pirates' | 'players'; galaxy: number; levels: number[]; status: TargetStatus | 'all'; sort: Sort };
+/** `expanded` : filtres dépliés ; repliés, une ligne les résume. */
+type Filters = { kind: 'pirates' | 'players'; galaxy: number; levels: number[]; status: TargetStatus | 'all'; sort: Sort; expanded: boolean };
 
-const DEFAULT_FILTERS: Filters = { kind: 'pirates', galaxy: 0, levels: [], status: 'all', sort: 'coords' };
+const DEFAULT_FILTERS: Filters = { kind: 'pirates', galaxy: 0, levels: [], status: 'all', sort: 'coords', expanded: false };
 const FILTERS_KEY = 'radar.filters';
 /** Niveau inconnu, dans le filtre des niveaux. */
 const UNKNOWN = 0;
@@ -23,6 +24,7 @@ const STATUSES: [TargetStatus, string][] = [
   ['respy', 'À réespionner'],
   ['unprobed', 'À sonder'],
 ];
+const SORT_LABELS: Record<Sort, string> = { coords: 'Position', proximity: 'Proximité', loot: 'Butin', profit: 'Rentabilité', protection: 'Fin de protection' };
 const PILL: Record<TargetStatus, string> = { ready: 'Prêt', protected: 'Protégé', respy: 'À réespionner', unprobed: 'À sonder' };
 
 /** `trip` : aller des grands transporteurs du butin depuis l'origine proposée ; `profit` : butin par minute de vol. */
@@ -46,6 +48,20 @@ const SORTS: Record<Sort, (a: Row, b: Row) => number> = {
   protection: (a, b) => availableAt(a) - availableAt(b) || byCoords(a, b),
 };
 
+/** Minuscules sans accents, pour la recherche. */
+const fold = (text: string) => text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+
+/** Recherche : nom, joueur ou tag de guilde, ou coordonnées (« 1:2 » : tout le système). */
+function matches(t: Target, query: string) {
+  const q = fold(query.trim());
+  if (!q) return true;
+  if (/^[\d:]+$/.test(q)) {
+    const parts = q.split(':').filter(Boolean).map(Number);
+    return [t.g, t.s, t.p].slice(0, parts.length).every((v, i) => v === parts[i]);
+  }
+  return [t.name, t.owner, t.tag].some(v => v && fold(v).includes(q));
+}
+
 function loadFilters(): Filters {
   try {
     return { ...DEFAULT_FILTERS, ...JSON.parse(localStorage.getItem(FILTERS_KEY) ?? '{}') };
@@ -66,6 +82,7 @@ type Props = { state: GameState; store?: TargetStore; reportsAt?: number; viewed
 
 export function Targets({ state, store, reportsAt, viewedSystems, scan, now, page }: Props) {
   const [filters, setFilters] = useState(loadFilters);
+  const [search, setSearch] = useState('');
   const [open, setOpen] = useState<string | null>(null);
 
   // Rapports relus à l'ouverture (le service worker limite à une fois toutes les 2 min).
@@ -85,8 +102,9 @@ export function Targets({ state, store, reportsAt, viewedSystems, scan, now, pag
 
   const list = Object.entries(store?.list ?? {});
   const galaxies = [...new Set(list.map(([, t]) => t.g))].sort((a, b) => a - b);
-  const rows: Row[] = list
-    .filter(([, t]) => t.pirate === (filters.kind === 'pirates') && (!filters.galaxy || t.g === filters.galaxy))
+  const ofKind = list.filter(([, t]) => t.pirate === (filters.kind === 'pirates'));
+  const rows: Row[] = ofKind
+    .filter(([, t]) => (!filters.galaxy || t.g === filters.galaxy) && matches(t, search))
     .map(([key, t]) => {
       const loot = lootOf(t);
       const cargo = loot ? cargoFor(loot, state.user.research.hyperspaceTech) : 0;
@@ -103,6 +121,22 @@ export function Targets({ state, store, reportsAt, viewedSystems, scan, now, pag
   const statusCounts = countBy(rows.filter(levelOk), r => r.status);
   const levels = [...new Set([...levelCounts.keys(), ...filters.levels])].sort((a, b) => (a || 99) - (b || 99));
   const shown = rows.filter(r => levelOk(r) && statusOk(r)).sort(SORTS[filters.sort]);
+  const showAll = () => {
+    update({ levels: [], status: 'all', galaxy: 0 });
+    setSearch('');
+  };
+
+  // Filtres repliés : ce qui est affiché, en une ligne.
+  const summary = [
+    shown.length === ofKind.length ? `${shown.length} cible${shown.length > 1 ? 's' : ''}` : `${shown.length} sur ${ofKind.length}`,
+    filters.galaxy > 0 && `G${filters.galaxy}`,
+    filters.levels.length > 0 && filters.levels.map(level => (level === UNKNOWN ? 'N?' : `N${level}`)).join(', '),
+    filters.status !== 'all' && STATUSES.find(([status]) => status === filters.status)?.[1],
+    search.trim() && `« ${search.trim()} »`,
+    `tri : ${SORT_LABELS[filters.sort].toLowerCase()}`,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   // Dernière observation en galaxie de chaque système, toutes cibles confondues.
   const seen = new Map<string, number>();
@@ -121,29 +155,49 @@ export function Targets({ state, store, reportsAt, viewedSystems, scan, now, pag
       <div className="filters">
         <div className="row">
           <Segmented value={filters.kind} options={[['pirates', 'Repaires'], ['players', 'Joueurs']]} onChange={kind => update({ kind, levels: [] })} />
-          {galaxies.length > 1 && (
-            <Segmented
-              value={filters.galaxy}
-              options={[[0, 'Toutes'], ...galaxies.map((g): [number, string] => [g, `G${g}`])]}
-              onChange={galaxy => update({ galaxy })}
-            />
-          )}
-          <span className="spacer" />
-          <select value={filters.sort} onChange={e => update({ sort: e.target.value as Sort })} aria-label="Tri">
-            <option value="coords">Position</option>
-            <option value="proximity">Proximité</option>
-            <option value="loot">Butin</option>
-            <option value="profit">Rentabilité</option>
-            <option value="protection">Fin de protection</option>
-          </select>
-          <ScanButton control={scanControl} scan={scan} title="Rouvrir tous les secteurs déjà observés pour mettre les cibles à jour" />
+          <input
+            type="search"
+            className="search"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Nom, joueur ou 1:2:9"
+            aria-label="Rechercher une cible"
+          />
+          <button aria-expanded={filters.expanded} onClick={() => update({ expanded: !filters.expanded })}>
+            Filtres {filters.expanded ? '▴' : '▾'}
+          </button>
           {!page && (
             <button className="icon" title="Ouvrir dans un onglet" onClick={() => void chrome.tabs.create({ url: chrome.runtime.getURL('popup.html?page') })}>
               ⤢
             </button>
           )}
         </div>
-        {filters.kind === 'pirates' && levels.length > 0 && (
+        {!filters.expanded && (
+          <button className="filters-summary" title="Déplier les filtres" onClick={() => update({ expanded: true })}>
+            {summary}
+          </button>
+        )}
+        {filters.expanded && (
+          <div className="row">
+            {galaxies.length > 1 && (
+              <Segmented
+                value={filters.galaxy}
+                options={[[0, 'Toutes'], ...galaxies.map((g): [number, string] => [g, `G${g}`])]}
+                onChange={galaxy => update({ galaxy })}
+              />
+            )}
+            <span className="spacer" />
+            <select value={filters.sort} onChange={e => update({ sort: e.target.value as Sort })} aria-label="Tri">
+              {Object.entries(SORT_LABELS).map(([sort, text]) => (
+                <option key={sort} value={sort}>
+                  {text}
+                </option>
+              ))}
+            </select>
+            <ScanButton control={scanControl} scan={scan} title="Rouvrir tous les secteurs déjà observés pour mettre les cibles à jour" />
+          </div>
+        )}
+        {filters.expanded && filters.kind === 'pirates' && levels.length > 0 && (
           <div className="row" role="group" aria-label="Niveaux">
             {levels.map(level => (
               <Chip key={level} active={filters.levels.includes(level)} count={levelCounts.get(level) ?? 0} onClick={() => toggleLevel(level)}>
@@ -157,17 +211,19 @@ export function Targets({ state, store, reportsAt, viewedSystems, scan, now, pag
             )}
           </div>
         )}
-        <ScanPanel control={scanControl} scan={scan} now={now} what={`déjà observé${plural} ou espionné${plural}`} />
-        <div className="row" role="group" aria-label="État">
-          <Chip active={filters.status === 'all'} count={rows.filter(levelOk).length} onClick={() => update({ status: 'all' })}>
-            Tous
-          </Chip>
-          {STATUSES.map(([status, text]) => (
-            <Chip key={status} className={status} active={filters.status === status} count={statusCounts.get(status) ?? 0} onClick={() => update({ status })}>
-              {text}
+        {filters.expanded && (
+          <div className="row" role="group" aria-label="État">
+            <Chip active={filters.status === 'all'} count={rows.filter(levelOk).length} onClick={() => update({ status: 'all' })}>
+              Tous
             </Chip>
-          ))}
-        </div>
+            {STATUSES.map(([status, text]) => (
+              <Chip key={status} className={status} active={filters.status === status} count={statusCounts.get(status) ?? 0} onClick={() => update({ status })}>
+                {text}
+              </Chip>
+            ))}
+          </div>
+        )}
+        <ScanPanel control={scanControl} scan={scan} now={now} what={`déjà observé${plural} ou espionné${plural}`} />
       </div>
 
       {!list.length ? (
@@ -177,7 +233,7 @@ export function Targets({ state, store, reportsAt, viewedSystems, scan, now, pag
       ) : !shown.length ? (
         <p className="muted empty">
           Aucune cible pour ces filtres.{' '}
-          <button className="link" onClick={() => update({ levels: [], status: 'all', galaxy: 0 })}>
+          <button className="link" onClick={showAll}>
             Tout afficher
           </button>
         </p>
