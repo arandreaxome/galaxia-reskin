@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { alerts, fleetNextTime, foreignLabel, fullAt, resourcesAt, RESOURCES, shipyardEnd, socialCount } from '../analysis';
 import { clock, coords, duration, num, place } from '../format';
 import { FLEET_STATES, label, missionName, resourceName, setThemedNames } from '../names';
@@ -154,9 +154,7 @@ export function App() {
             )}
           </section>
 
-          {state.planets.map(p => (
-            <PlanetCard key={p.id} planet={p} now={now} />
-          ))}
+          <Planets planets={state.planets} now={now} />
           <Research state={state} now={now} />
           <Fleets state={state} now={now} />
 
@@ -169,15 +167,74 @@ export function App() {
   );
 }
 
-function PlanetCard({ planet: p, now }: { planet: Planet; now: number }) {
-  const stock = resourcesAt(p, now);
-  const build = p.buildQueue[0];
-  const lot = p.shipQueue[0];
-  const shipEnd = shipyardEnd(p);
+const UNFOLDED_KEY = 'radar.empire.unfolded';
+
+function loadUnfolded(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(UNFOLDED_KEY) ?? '[]');
+  } catch {
+    return [];
+  }
+}
+
+/** Planètes repliées par défaut, une ligne chacune, sous le total de l'empire ; une planète dépliée le reste. */
+function Planets({ planets, now }: { planets: Planet[]; now: number }) {
+  const [unfolded, setUnfolded] = useState(loadUnfolded);
+  const toggle = (id: string) => {
+    const next = unfolded.includes(id) ? unfolded.filter(other => other !== id) : [...unfolded, id];
+    setUnfolded(next);
+    try {
+      localStorage.setItem(UNFOLDED_KEY, JSON.stringify(next));
+    } catch {
+      // Préférence non gardée, sans conséquence.
+    }
+  };
+  return (
+    <>
+      {planets.length > 1 && <Totals planets={planets} now={now} />}
+      {planets.map(p => (
+        <PlanetCard key={p.id} planet={p} now={now} folded={!unfolded.includes(p.id)} onFold={() => toggle(p.id)} />
+      ))}
+    </>
+  );
+}
+
+/** Stocks et production horaire de toutes les planètes ; un stockage plein ne produit plus. */
+function Totals({ planets, now }: { planets: Planet[]; now: number }) {
+  const moons = planets.filter(p => p.moon).length;
+  const bodies = [`${planets.length - moons} planète${planets.length - moons > 1 ? 's' : ''}`, moons && `${moons} lune${moons > 1 ? 's' : ''}`];
   return (
     <section className="card">
       <h2>
-        {p.name}
+        Total
+        <span className="muted">{bodies.filter(Boolean).join(' · ')}</span>
+      </h2>
+      <table>
+        <tbody>
+          {RESOURCES.map(r => {
+            const stock = planets.reduce((sum, p) => sum + resourcesAt(p, now)[r], 0);
+            const rate = planets.reduce((sum, p) => sum + (resourcesAt(p, now)[r] < (p.caps[r] ?? Infinity) ? (p.production[r] ?? 0) : 0), 0);
+            return (
+              <tr key={r}>
+                <th>{resourceName(r)}</th>
+                <td className="num">{num(stock)}</td>
+                <td className="muted">{rate > 0 ? `+${num(rate)}/h` : 'production arrêtée'}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
+function PlanetCard({ planet: p, now, folded, onFold }: { planet: Planet; now: number; folded: boolean; onFold: () => void }) {
+  return (
+    <section className="card">
+      <h2>
+        <button className="fold" aria-expanded={!folded} title={folded ? 'Déplier' : 'Replier'} onClick={onFold}>
+          {folded ? '▸' : '▾'} {p.name}
+        </button>
         <span className="planet-head">
           <span className="muted">{coords(p)}</span>
           <button className="icon goto" title={`Ouvrir ${p.name} dans le jeu`} onClick={() => open('#/', p.id)}>
@@ -185,6 +242,38 @@ function PlanetCard({ planet: p, now }: { planet: Planet; now: number }) {
           </button>
         </span>
       </h2>
+      {folded ? <PlanetSummary planet={p} now={now} /> : <PlanetDetails planet={p} now={now} />}
+    </section>
+  );
+}
+
+/** Planète repliée : construction et chantier sur une ligne, premier stockage plein sur la suivante. */
+function PlanetSummary({ planet: p, now }: { planet: Planet; now: number }) {
+  const build = p.buildQueue[0];
+  const lot = p.shipQueue[0];
+  const full = RESOURCES.map(r => ({ r, t: fullAt(p, r) }))
+    .filter((f): f is { r: (typeof RESOURCES)[number]; t: number } => f.t != null)
+    .sort((a, b) => a.t - b.t)[0];
+  const work: ReactNode[] = [];
+  if (build) work.push(<span key="build">{label(build.key)} {build.demolish ? '(démolition)' : build.level} · {duration(build.end - now)}</span>);
+  else if (!p.moon) work.push(<span key="build" className="warn">Aucune construction</span>);
+  if (lot) work.push(<span key="lot">{num(lot.count)} × {label(lot.key)}</span>);
+  return (
+    <div className="planet-summary">
+      {work.length > 0 && <p>{work.flatMap((part, i) => (i ? [' · ', part] : [part]))}</p>}
+      {full && (full.t <= now ? <p className="warn">{resourceName(full.r)} plein</p> : <p className="muted">{resourceName(full.r)} plein dans {duration(full.t - now)}</p>)}
+    </div>
+  );
+}
+
+/** Planète dépliée : stocks, énergie, construction et chantier. */
+function PlanetDetails({ planet: p, now }: { planet: Planet; now: number }) {
+  const stock = resourcesAt(p, now);
+  const build = p.buildQueue[0];
+  const lot = p.shipQueue[0];
+  const shipEnd = shipyardEnd(p);
+  return (
+    <>
       <table>
         <tbody>
           {RESOURCES.map(r => {
@@ -239,7 +328,7 @@ function PlanetCard({ planet: p, now }: { planet: Planet; now: number }) {
           </tr>
         </tbody>
       </table>
-    </section>
+    </>
   );
 }
 

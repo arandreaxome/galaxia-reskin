@@ -844,6 +844,32 @@ input[type='checkbox']:focus-visible {
   text-transform: uppercase;
 }
 
+/* Carte d'une planète repliable (onglet Empire) : son nom la déplie ; repliée, deux lignes la résument. */
+h2 .fold {
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  text-transform: inherit;
+  background: none;
+  border: 0;
+}
+
+h2 .fold:hover,
+h2 .fold:active {
+  text-decoration: underline;
+  text-decoration-color: var(--highlight);
+  text-underline-offset: 2px;
+  background: none;
+}
+
+.planet-summary p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Carte d'une planète (onglet Empire) : coordonnées et ouverture de la planète dans le jeu. */
 .planet-head {
   display: flex;
